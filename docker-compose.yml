@@ -20,8 +20,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: nest-docker-postgres
-    environment:
-      - PORT=${PORT}
     ports:
       - '3000:3000'
     depends_on:
