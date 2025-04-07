@@ -1,5 +1,5 @@
 # Base image
-FROM node:22
+FROM arm64v8/node:22
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY . .
 
 COPY .env.example ./.env
 
-RUN npm run build
+RUN npm install --build-from-source
 
 EXPOSE 3000
 
