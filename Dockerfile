@@ -11,7 +11,7 @@ COPY . .
 
 COPY .env.example ./.env
 
-RUN npm install --build-from-source
+RUN npm install
 
 EXPOSE 3000
 
