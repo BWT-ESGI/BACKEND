@@ -21,7 +21,7 @@ import { ReportModule } from './report/report.module';
     ReportModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DB_HOST || 'db',
       port: parseInt(process.env.DB_PORT, 10) || 5555,
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'pass123',
