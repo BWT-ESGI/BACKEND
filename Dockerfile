@@ -1,5 +1,5 @@
 # Base image
-FROM arm64v8/node:22
+FROM node:22
 
 WORKDIR /app
 
