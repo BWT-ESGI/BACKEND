@@ -27,6 +27,13 @@ export class GoogleAuthenticationService implements OnModuleInit {
     this.oAuthClient = new OAuth2Client(clientId, clientSecret);
   }
 
+  private getRedirectUri() {
+    const isLocal = process.env.NODE_ENV === 'development';
+    return isLocal
+      ? this.configService.get('GOOGLE_REDIRECT_URI_LOCAL')
+      : this.configService.get('GOOGLE_REDIRECT_URI_PROD');
+  }
+
   async authenticate(token: string) {
     try {
       const loginTicket = await this.oAuthClient.verifyIdToken({
