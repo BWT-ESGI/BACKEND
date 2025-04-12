@@ -25,35 +25,35 @@ export class UsersController {
 
   @Post()
   @Auth(AuthType.Bearer)
-  @Roles(Role.Professor)
+  @Roles(Role.Teacher)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
   @Get()
   @Auth(AuthType.Bearer)
-  @Roles(Role.Professor)
+  @Roles(Role.Teacher)
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
   @Auth(AuthType.Bearer)
-  @Roles(Role.Professor)
+  @Roles(Role.Teacher)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
   @Patch(':id')
   @Auth(AuthType.Bearer)
-  @Roles(Role.Professor)
+  @Roles(Role.Teacher)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
   @Auth(AuthType.Bearer)
-  @Roles(Role.Professor)
+  @Roles(Role.Teacher)
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
