@@ -1,6 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
 import { Group } from '@/group/entities/group.entity';
 import { Promotion } from '@/promotion/entities/promotion.entity';
+export type ProjectStatus = "draft" | "published" | "archived" | "active" | "inactive";
+export type GroupCompositionType = "manual" | "random" | "student_choice";
 
 @Entity()
 export class Project {
@@ -17,6 +19,15 @@ export class Project {
   @JoinColumn()
   promotion: Promotion;
 
+  @Column({ nullable: true })
+  nbStudensMinPerGroup: number;
+
+  @Column({ nullable: true })
+  nbStudentsMaxPerGroup: number;
+
+  @Column({ nullable: true })
+  nbGroups: number;
+
   @OneToMany(() => Group, (group) => group.project)
   groups: Group[];
 
@@ -25,4 +36,18 @@ export class Project {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({
+    type: 'enum',
+    enum: ['manual', 'random', 'student_choice'],
+    default: 'manual',
+  })
+  groupCompositionType: GroupCompositionType;
+
+  @Column({
+    type: 'enum',
+    enum: ['draft', 'published', 'archived', 'active', 'inactive'],
+    default: 'active',
+  })
+  status: ProjectStatus;
 }

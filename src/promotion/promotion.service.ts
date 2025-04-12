@@ -65,7 +65,7 @@ export class PromotionService {
   }
 
   findOne(id: string): Promise<Promotion> {
-    return this.promotionRepository.findOne({ where: { id } });
+    return this.promotionRepository.findOne({ where: { id } , relations: ['teacher', 'students', 'projects'],} );
   }
 
   async update(id: string, updatePromotionDto: UpdatePromotionDto): Promise<Promotion> {

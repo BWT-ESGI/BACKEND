@@ -4,17 +4,33 @@ import { Repository } from 'typeorm';
 import { Project } from './entities/project.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { Promotion } from '@/promotion/entities/promotion.entity';
 
 @Injectable()
 export class ProjectService {
   constructor(
+    @InjectRepository(Promotion)
+    private readonly promotionRepository: Repository<Promotion>,
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
   ) {}
 
-  async create(createProjectDto: CreateProjectDto): Promise<Project> {
-    const project = this.projectRepository.create(createProjectDto);
-    return await this.projectRepository.save(project);
+  async create(dto: CreateProjectDto): Promise<Project> {
+    const promotion = await this.promotionRepository.findOne({
+      where: { id: dto.promotionId },
+    });
+
+    if (!promotion) {
+      throw new NotFoundException('Promotion non trouvée');
+    }
+
+    const project = this.projectRepository.create({
+      name: dto.name,
+      description: dto.description,
+      promotion,
+    });
+
+    return this.projectRepository.save(project);
   }
 
   async findAll(): Promise<Project[]> {
