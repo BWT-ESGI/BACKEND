@@ -4,14 +4,8 @@ export class CreatePromotionDto {
   @IsString()
   name: string;
 
-  @IsUUID()
   teacherId: string;
 
   @IsOptional()
-  @IsUUID("all", { each: true })
   studentIds?: string[];
-
-  @IsOptional()
-  @IsUUID("all", { each: true })
-  projectIds?: string[];
 }

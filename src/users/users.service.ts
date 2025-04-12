@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { Role } from './enums/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -60,5 +61,17 @@ export class UsersService {
     }
     Object.assign(user, dto);
     return this.userRepository.save(user);
+  }
+
+  async createNewUserFromEmail(email: string): Promise<User> {
+    const existing = await this.userRepository.findOne({ where: { email } });
+    if (existing) return existing;
+
+    const newUser = this.userRepository.create({
+      email,
+      role: Role.Student,
+    });
+
+    return this.userRepository.save(newUser);
   }
 }

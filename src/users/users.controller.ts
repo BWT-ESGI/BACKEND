@@ -31,8 +31,6 @@ export class UsersController {
   }
 
   @Get()
-  @Auth(AuthType.Bearer)
-  @Roles(Role.Teacher)
   findAll() {
     return this.usersService.findAll();
   }
