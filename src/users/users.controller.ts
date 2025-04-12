@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,34 +19,54 @@ import { Role } from './enums/role.enum';
 
 @ApiTags('Users')
 @ApiBearerAuth('jwt')
-@Auth(AuthType.Bearer)
-@Roles(Role.Admin)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @Auth(AuthType.Bearer)
+  @Roles(Role.Professor)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
   @Get()
+  @Auth(AuthType.Bearer)
+  @Roles(Role.Professor)
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
+  @Auth(AuthType.Bearer)
+  @Roles(Role.Professor)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
   @Patch(':id')
+  @Auth(AuthType.Bearer)
+  @Roles(Role.Professor)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
+  @Auth(AuthType.Bearer)
+  @Roles(Role.Professor)
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+
+  @Get('/:id/check-registration')
+  @Auth(AuthType.None)
+  async checkRegistration(@Param('id') id: string) {
+    return this.usersService.checkRegistration(id);
+  }
+
+  @Put('/:email')
+  @Auth(AuthType.None)
+  async updateUserProfile(@Param('email') email: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.updateProfile(email, dto);
   }
 }

@@ -34,7 +34,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
       : this.configService.get('GOOGLE_REDIRECT_URI_PROD');
   }
 
-  async authenticate(token: string) {
+  async authenticate(token: string, userEmail?: string) {
     try {
       const loginTicket = await this.oAuthClient.verifyIdToken({
         idToken: token,
@@ -42,10 +42,24 @@ export class GoogleAuthenticationService implements OnModuleInit {
       const { email, sub: googleId } = loginTicket.getPayload();
       const user = await this.userRepository.findOneBy({ googleId });
       if (user) {
+        const token = await this.authService.generateTokens(user);
+        return {
+          userId: user.id,
+          accessToken: token.accessToken,
+          role: user.role
+        };
+      } else if (userEmail) {
+        const user = await this.userRepository.findOne({ where: { email: userEmail } });
+      
+        if (!user) {
+          throw new UnauthorizedException('No user found with the provided email.');
+        }
+      
+        user.googleId = googleId;
+        user.registrationLinkId = null;
+        await this.userRepository.save(user);
+      
         return this.authService.generateTokens(user);
-      } else {
-        const newUser = await this.userRepository.save({ email, googleId });
-        return this.authService.generateTokens(newUser);
       }
     } catch (err) {
       const pgUniqueViolationErrorCode = '23505';

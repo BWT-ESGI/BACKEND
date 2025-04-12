@@ -32,7 +32,7 @@ export class UsersService {
     id: number,
     updateUserDto: UpdateUserDto,
   ): Promise<User | undefined> {
-    const user = this.findOne(id);
+    const user = await this.findOne(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
@@ -46,5 +46,19 @@ export class UsersService {
       return await this.userRepository.remove(userToRemove);
     }
     throw new NotFoundException(`User with id ${id} not found`);
+  }
+
+  async checkRegistration(id: string): Promise<{ valid: boolean, email: string }> {
+    const user = await this.userRepository.findOne({ where: { registrationLinkId: id } });
+    return { valid: !!user, email: user ? user.email : "" };
+  }
+
+  async updateProfile(email: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { email: email } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    Object.assign(user, dto);
+    return this.userRepository.save(user);
   }
 }

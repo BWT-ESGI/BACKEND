@@ -16,7 +16,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   email: string;
 
   @Column({ nullable: true })
@@ -25,14 +25,29 @@ export class User {
   @Column({ nullable: true })
   googleId: string;
 
-  @Column({ enum: Role, default: Role.Regular })
+  @Column({ enum: Role, default: Role.Student, nullable: true })
   role: Role;
 
-  @Column({ default: false })
+  @Column({ default: true })
   isTfaEnabled: boolean;
 
   @Column({ nullable: true })
   tfaSecret: string;
+
+  @Column({ unique: true, nullable: true })
+  username: string;
+
+  @Column({ nullable: true })
+  firstName: string;
+
+  @Column({ nullable: true })
+  lastName: string;
+
+  @Column({ nullable: true })
+  description: string;
+
+  @Column({ nullable: true })
+  registrationLinkId: string;
 
   @OneToMany(() => Promotion, (promotion) => promotion.teacher)
   promotions: Promotion[];
