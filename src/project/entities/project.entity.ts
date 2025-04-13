@@ -20,10 +20,17 @@ export class Project {
   promotion: Promotion;
 
   @Column({ nullable: true })
-  nbStudensMinPerGroup: number;
+  nbStudentsMinPerGroup: number;
 
   @Column({ nullable: true })
   nbStudentsMaxPerGroup: number;
+
+  @Column({
+      type: 'enum',
+      enum: ['manual', 'random', 'student_choice'],
+      default: 'manual',
+    })
+  groupCompositionType: GroupCompositionType;
 
   @Column({ nullable: true })
   nbGroups: number;
@@ -36,13 +43,6 @@ export class Project {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @Column({
-    type: 'enum',
-    enum: ['manual', 'random', 'student_choice'],
-    default: 'manual',
-  })
-  groupCompositionType: GroupCompositionType;
 
   @Column({
     type: 'enum',

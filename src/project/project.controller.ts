@@ -3,6 +3,7 @@ import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Project } from './entities/project.entity';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -25,8 +26,8 @@ export class ProjectController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectService.update(+id, updateProjectDto);
+  update(@Param('id') id: number, @Body() updateDto: Partial<Project>) {
+    return this.projectService.updateProject(id, updateDto);
   }
 
   @Delete(':id')

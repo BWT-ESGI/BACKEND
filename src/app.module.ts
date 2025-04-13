@@ -10,6 +10,7 @@ import { IamModule } from './iam/iam.module';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { ReportModule } from './report/report.module';
 import { DeliverableModule } from './deliverable/deliverable.module';
+import { GroupModule } from './group/group.module';
 import config from './config.ts';
 
 @Module({
@@ -24,6 +25,7 @@ import config from './config.ts';
         },
       }
     ),
+    GroupModule,
     DeliverableModule,
     SubmissionModule,
     PromotionModule,

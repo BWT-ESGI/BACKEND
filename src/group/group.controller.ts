@@ -3,6 +3,8 @@ import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Group } from './entities/group.entity';
+import { SaveGroupDto } from './dto/save-groups.dto';
 
 @ApiTags('Groups')
 @Controller('groups')
@@ -32,5 +34,18 @@ export class GroupController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.groupService.remove(+id);
+  }
+
+  @Get('by-project/:projectId')
+  async findByProject(@Param('projectId') projectId: string): Promise<Group[]> {
+    return this.groupService.findByProjectId(projectId);
+  }
+
+  @Post('save-for-project/:projectId')
+  async saveForProject(
+    @Param('projectId') projectId: string,
+    @Body() groups: SaveGroupDto[],
+  ) {
+    return this.groupService.saveGroupsForProject(parseInt(projectId, 10), groups);
   }
 }
