@@ -9,9 +9,6 @@ import { Report } from '@/report/entities/report.entity';
 
 @Injectable()
 export class ProjectService {
-  findAll() {
-    throw new Error('Method not implemented.');
-  }
   constructor(
     @InjectRepository(Promotion)
     private readonly promotionRepository: Repository<Promotion>,
@@ -22,6 +19,12 @@ export class ProjectService {
     @InjectRepository(Report)
     private readonly reportRepository: Repository<Report>,
   ) {}
+
+  async findAll(): Promise<Project[]> {
+    return this.projectRepository.find({
+      relations: ['promotion', 'groups', 'groups.members'],
+    });
+  }
 
   async create(dto: CreateProjectDto): Promise<Project> {
     const promotion = await this.promotionRepository.findOne({
