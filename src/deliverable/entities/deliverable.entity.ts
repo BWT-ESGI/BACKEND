@@ -6,6 +6,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Project } from '@/project/entities/project.entity';
+import { ValidationRule } from './validation-rule.entity';
 
 @Entity()
 export class Deliverable {
@@ -26,5 +28,16 @@ export class Deliverable {
 
   @Column({ type: 'float', default: 0 })
   penaltyPerHourLate: number;
-
+  
+  @Column()
+  submissionType: 'archive' | 'git';
+  
+  @Column({ nullable: true })
+  maxSize?: number; // En Mo
+  
+  @ManyToOne(() => Project, project => project.deliverables)
+  project: Project;
+  
+  @OneToMany(() => ValidationRule, rule => rule.deliverable, { cascade: true })
+  validationRules: ValidationRule[];
 }

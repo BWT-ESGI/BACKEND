@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
 import { Group } from '@/group/entities/group.entity';
 import { Promotion } from '@/promotion/entities/promotion.entity';
+import { Deliverable } from '@/deliverable/entities/deliverable.entity';
 export type ProjectStatus = "draft" | "published" | "archived" | "active" | "inactive";
 export type GroupCompositionType = "manual" | "random" | "student_choice";
 
@@ -37,6 +38,9 @@ export class Project {
 
   @OneToMany(() => Group, (group) => group.project)
   groups: Group[];
+
+  @OneToMany(() => Deliverable, deliverable => deliverable.project)
+  deliverables: Deliverable[];
 
   @CreateDateColumn()
   createdAt: Date;
