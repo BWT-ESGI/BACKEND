@@ -49,4 +49,11 @@ export class ReportService {
 
     return this.reportRepository.findOne({ where: { id: reportId.toString() } });
   }
+
+  async findByProjectId(projectId: string): Promise<Report[]> {
+    return this.reportRepository.find({
+      where: { group: { project: { id: parseInt(projectId, 10) } } },
+      relations: ['group', 'group.project'],
+    });
+  }
 }

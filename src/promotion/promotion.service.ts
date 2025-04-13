@@ -74,6 +74,8 @@ export class PromotionService {
   }
 
   async remove(id: string): Promise<void> {
+    await this.userRepository.update({ promotion: { id } }, { promotion: null });
+
     await this.promotionRepository.delete(id);
   }
 }

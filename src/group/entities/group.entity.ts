@@ -21,7 +21,7 @@ export class Group {
   @ManyToOne(() => User, { nullable: true }) 
   leader: User;
 
-  @ManyToOne(() => Project, (project) => project.groups)
+  @ManyToOne(() => Project, (project) => project.groups,  { onDelete: 'CASCADE' })
   project: Project;
 
   @ManyToMany(() => User)

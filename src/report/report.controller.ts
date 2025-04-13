@@ -22,7 +22,7 @@ export class ReportController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Report> {
-    return this.reportService.findOne(id);
+  async findAllReportByProject(@Param('id') id: string): Promise<Report[]> {
+    return this.reportService.findByProjectId(id);
   }
 }

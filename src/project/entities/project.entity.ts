@@ -15,7 +15,7 @@ export class Project {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @ManyToOne(() => Promotion, (promotion) => promotion.projects)
+  @ManyToOne(() => Promotion, (promotion) => promotion.projects,  { onDelete: 'CASCADE' })
   @JoinColumn()
   promotion: Promotion;
 
