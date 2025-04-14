@@ -15,14 +15,14 @@ services:
       - '6380:6379'
     restart: always
 
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: nest-docker-postgres
-  #   ports:
-  #     - '3000:3000'
-  #   depends_on:
-  #     - db
-  #   volumes:
-  #     - ./src:/app/src
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nest-docker-postgres
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
