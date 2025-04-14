@@ -10,6 +10,7 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.CORS_ORIGIN,
     credentials: true,
+    allowedHeaders: 'Content-Type, Authorization, Access-Control-Allow-Origin',
   });
 
   // Setting up swagger
