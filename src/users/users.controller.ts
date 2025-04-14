@@ -37,7 +37,6 @@ export class UsersController {
 
   @Get(':id')
   @Auth(AuthType.Bearer)
-  @Roles(Role.Teacher)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
