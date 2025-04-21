@@ -4,11 +4,13 @@ import {
   JoinTable,
   ManyToOne,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { User } from '@/users/entities/user.entity';
 import { Project } from '@/project/entities/project.entity';
+import { Defense } from '@/defense/entities/defense.entity';
 
 @Entity()
 export class Group {
@@ -23,6 +25,9 @@ export class Group {
 
   @ManyToOne(() => Project, (project) => project.groups,  { onDelete: 'CASCADE' })
   project: Project;
+
+  @OneToMany(() => Defense, (defense) => defense.group, { cascade: true })
+  defenses: Defense[];
 
   @ManyToMany(() => User)
   @JoinTable()

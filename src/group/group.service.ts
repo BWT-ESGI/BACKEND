@@ -85,4 +85,13 @@ export class GroupService {
 
     return savedGroups;
   }
+
+  async findWithMembers(projectId: string): Promise<Group[]> {
+    return this.groupRepository
+      .createQueryBuilder('group')
+      .leftJoinAndSelect('group.members', 'member')
+      .where('group.projectId = :projectId', { projectId })
+      .orderBy('group.name', 'ASC')
+      .getMany();
+  }
 }

@@ -48,4 +48,9 @@ export class GroupController {
   ) {
     return this.groupService.saveGroupsForProject(parseInt(projectId, 10), groups);
   }
+
+  @Get('by-user/:projectId')
+  async findByUser(@Param('userId') userId: string): Promise<Group[]> {
+    return this.groupService.findWithMembers(userId);
+  }
 }
