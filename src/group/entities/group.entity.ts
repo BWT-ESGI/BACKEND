@@ -6,6 +6,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
+  OneToOne,
 } from 'typeorm';
 
 import { User } from '@/users/entities/user.entity';
@@ -26,7 +27,7 @@ export class Group {
   @ManyToOne(() => Project, (project) => project.groups,  { onDelete: 'CASCADE' })
   project: Project;
 
-  @OneToMany(() => Defense, (defense) => defense.group, { cascade: true })
+  @OneToOne(() => Defense, (defense) => defense.group, { cascade: true })
   defenses: Defense[];
 
   @ManyToMany(() => User)

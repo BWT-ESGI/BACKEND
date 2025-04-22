@@ -6,6 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 import { Group } from '@/group/entities/group.entity';
 import { Month } from '../enums/month.enum';
@@ -27,7 +28,7 @@ export class Defense {
   @Column({ type: 'enum', enum: Month })
   month: Month;
 
-  @ManyToOne(() => Group, (group) => group.defenses, { onDelete: 'CASCADE' })
+  @OneToOne(() => Group, (group) => group.defenses, { onDelete: 'CASCADE' })
   @JoinColumn()
   group: Group;
 

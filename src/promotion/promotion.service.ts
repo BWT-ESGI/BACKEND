@@ -20,7 +20,7 @@ export class PromotionService {
   async create(createPromotionDto: CreatePromotionDto): Promise<Promotion> {
     const { name, teacherId, studentIds } = createPromotionDto;
   
-    const teacher = await this.userRepository.findOne({ where: { id: Number(teacherId) } });
+    const teacher = await this.userRepository.findOne({ where: { id: teacherId } });
     if (!teacher) throw new Error('Teacher not found');
   
     const promotion = this.promotionRepository.create({
@@ -40,7 +40,7 @@ export class PromotionService {
         if (idOrEmail.includes('@')) {
           student = await this.userService.createNewUserFromEmail(idOrEmail);
         } else {
-          student = await this.userRepository.findOne({ where: { id: Number(idOrEmail) } });
+          student = await this.userRepository.findOne({ where: { id: idOrEmail } });
         }
   
         if (student) {

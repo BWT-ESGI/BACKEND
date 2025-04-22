@@ -38,21 +38,21 @@ export class UsersController {
   @Get(':id')
   @Auth(AuthType.Bearer)
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
   @Patch(':id')
   @Auth(AuthType.Bearer)
   @Roles(Role.Teacher)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   @Auth(AuthType.Bearer)
   @Roles(Role.Teacher)
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(id);
   }
 
   @Get('/:id/check-registration')
