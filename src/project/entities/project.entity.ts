@@ -15,7 +15,9 @@ export class Project {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @ManyToOne(() => Promotion, (promotion) => promotion.projects,  { onDelete: 'CASCADE' })
+  @ManyToOne(() => Promotion, (promotion) => promotion.projects, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   promotion: Promotion;
 
@@ -26,10 +28,10 @@ export class Project {
   nbStudentsMaxPerGroup: number;
 
   @Column({
-      type: 'enum',
-      enum: ['manual', 'random', 'student_choice'],
-      default: 'manual',
-    })
+    type: 'enum',
+    enum: ['manual', 'random', 'student_choice'],
+    default: 'manual',
+  })
   groupCompositionType: GroupCompositionType;
 
   @Column({ nullable: true })
@@ -47,7 +49,7 @@ export class Project {
   @Column({
     type: 'enum',
     enum: ['draft', 'published', 'archived', 'active', 'inactive'],
-    default: 'active',
+    default: 'draft',
   })
   status: ProjectStatus;
 }
