@@ -17,6 +17,11 @@ export class PromotionController {
     return this.promotionService.findAll();
   }
 
+  @Get('/user/:id')
+  findAllByUser(@Param('id') id: string) {
+    return this.promotionService.findAllByUser(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.promotionService.findOne(id);

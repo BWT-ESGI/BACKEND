@@ -68,6 +68,17 @@ export class PromotionService {
     return this.promotionRepository.findOne({ where: { id } , relations: ['teacher', 'students', 'projects'],} );
   }
 
+  async findAllByUser(userId: string): Promise<Promotion[]> {
+    return this.promotionRepository
+      .createQueryBuilder('promotion')
+      .leftJoinAndSelect('promotion.teacher', 'teacher')
+      .leftJoinAndSelect('promotion.students', 'student')
+      .leftJoinAndSelect('promotion.projects', 'project')
+      .where('teacher.id = :userId', { userId })
+      .orWhere('student.id = :userId', { userId })
+      .getMany();
+  }
+  
   async update(id: string, updatePromotionDto: UpdatePromotionDto): Promise<Promotion> {
     await this.promotionRepository.update(id, updatePromotionDto);
     return this.findOne(id);
