@@ -68,7 +68,7 @@ export class ProjectService {
     return savedProject;
   }
 
-  async findOne(id: number): Promise<Project> {
+  async findOne(id: string): Promise<Project> {
     const project = await this.projectRepository.findOne({
       where: { id },
       relations: ['promotion', 'promotion.students', 'groups', 'groups.members'],
@@ -81,13 +81,13 @@ export class ProjectService {
     return project;
   }
 
-  async updateProject(id: number, updateDto: Partial<Project>): Promise<Project> {
+  async updateProject(id: string, updateDto: Partial<Project>): Promise<Project> {
     await this.findOne(id);
     await this.projectRepository.update(id, updateDto);
     return await this.findOne(id);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     await this.findOne(id);
     await this.projectRepository.delete(id);
   }

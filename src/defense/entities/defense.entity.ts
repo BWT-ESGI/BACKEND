@@ -12,8 +12,8 @@ import { Month } from '../enums/month.enum';
 
 @Entity()
 export class Defense {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;

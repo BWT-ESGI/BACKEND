@@ -6,8 +6,8 @@ export type GroupCompositionType = "manual" | "random" | "student_choice";
 
 @Entity()
 export class Project {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;

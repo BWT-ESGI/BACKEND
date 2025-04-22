@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { Group } from './entities/group.entity';
 import { SaveGroupDto } from './dto/save-groups.dto';
 
@@ -23,17 +23,17 @@ export class GroupController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.groupService.findOne(+id);
+    return this.groupService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-    return this.groupService.update(+id, updateGroupDto);
+    return this.groupService.update(id, updateGroupDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.groupService.remove(+id);
+    return this.groupService.remove(id);
   }
 
   @Get('by-project/:projectId')
@@ -46,11 +46,11 @@ export class GroupController {
     @Param('projectId') projectId: string,
     @Body() groups: SaveGroupDto[],
   ) {
-    return this.groupService.saveGroupsForProject(parseInt(projectId, 10), groups);
+    return this.groupService.saveGroupsForProject(projectId, groups);
   }
 
-  @Get('by-user/:projectId')
-  async findByUser(@Param('userId') userId: string): Promise<Group[]> {
-    return this.groupService.findWithMembers(userId);
+  @Get('by-project/:projectId')
+  async findByUser(@Param('projectId') projectId: string): Promise<Group[]> {
+    return this.groupService.findWithMembersAndDefenses(projectId);
   }
 }

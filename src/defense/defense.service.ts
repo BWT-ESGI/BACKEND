@@ -31,7 +31,7 @@ export class DefenseService {
     });
   }
 
-  async update(id: number, dto: UpdateDefenseDto): Promise<Defense> {
+  async update(id: string, dto: UpdateDefenseDto): Promise<Defense> {
     const defense = await this.defenseRepo.preload({ id, ...dto });
     if (!defense) {
       throw new NotFoundException(`Soutenance #${id} introuvable`);
@@ -39,7 +39,7 @@ export class DefenseService {
     return this.defenseRepo.save(defense);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const result = await this.defenseRepo.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Soutenance #${id} introuvable`);

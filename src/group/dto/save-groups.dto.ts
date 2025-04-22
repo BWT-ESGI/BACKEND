@@ -2,8 +2,7 @@ import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validato
 
 export class SaveGroupDto {
   @IsOptional()
-  @IsInt()
-  id?: number;
+  id?: string;
 
   @IsString()
   @IsNotEmpty()

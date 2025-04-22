@@ -21,7 +21,7 @@ export class GroupService {
 
   async findByProjectId(projectId: string): Promise<Group[]> {
     return this.groupRepository.find({
-      where: { project: { id: parseInt(projectId, 10) } },
+      where: { project: { id: projectId } },
       relations: ['members', 'project'],
     });
   }
@@ -35,24 +35,24 @@ export class GroupService {
     return await this.groupRepository.find();
   }
 
-  async findOne(id: number): Promise<Group> {
-    const group = await this.groupRepository.findOne({ where: { id: id.toString() } });
+  async findOne(id: string): Promise<Group> {
+    const group = await this.groupRepository.findOne({ where: { id: id } });
     if (!group) throw new NotFoundException('Group not found');
     return group;
   }
 
-  async update(id: number, updateGroupDto: UpdateGroupDto): Promise<Group> {
+  async update(id: string, updateGroupDto: UpdateGroupDto): Promise<Group> {
     await this.findOne(id);
     await this.groupRepository.update(id, updateGroupDto);
     return await this.findOne(id);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     await this.findOne(id);
     await this.groupRepository.delete(id);
   }
 
-  async saveGroupsForProject(projectId: number, groupDtos: SaveGroupDto[]): Promise<Group[]> {
+  async saveGroupsForProject(projectId: string, groupDtos: SaveGroupDto[]): Promise<Group[]> {
     const project = await this.projectRepository.findOneOrFail({ where: { id: projectId } });
 
     const savedGroups: Group[] = [];
@@ -65,7 +65,7 @@ export class GroupService {
       if (dto.id) {
         // Update existing
         group = await this.groupRepository.findOneOrFail({
-          where: { id: dto.id.toString() },
+          where: { id: String(dto.id) },
           relations: ['members'],
         });
         group.name = dto.name;
@@ -86,12 +86,13 @@ export class GroupService {
     return savedGroups;
   }
 
-  async findWithMembers(projectId: string): Promise<Group[]> {
+  async findWithMembersAndDefenses(projectId: string): Promise<Group[]> {
     return this.groupRepository
       .createQueryBuilder('group')
       .leftJoinAndSelect('group.members', 'member')
+      .leftJoinAndSelect('group.defenses', 'defense')
       .where('group.projectId = :projectId', { projectId })
-      .orderBy('group.name', 'ASC')
+      .orderBy('defense.start', 'ASC')
       .getMany();
   }
 }

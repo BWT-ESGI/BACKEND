@@ -31,14 +31,14 @@ export class DefenseController {
 
   @Patch(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() dto: UpdateDefenseDto,
   ) {
     return this.defenseService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id') id: string) {
     return this.defenseService.remove(id);
   }
 }
