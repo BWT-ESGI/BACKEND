@@ -46,6 +46,9 @@ export class Project {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Column({ nullable: true })
+  endAt: Date;
+
   @Column({
     type: 'enum',
     enum: ['draft', 'published', 'archived', 'active', 'inactive'],
