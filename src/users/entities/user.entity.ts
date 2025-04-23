@@ -38,6 +38,9 @@ export class User {
   username: string;
 
   @Column({ nullable: true })
+  schoolName: string;
+
+  @Column({ nullable: true })
   firstName: string;
 
   @Column({ nullable: true })

@@ -34,32 +34,48 @@ export class GoogleAuthenticationService implements OnModuleInit {
       : this.configService.get('GOOGLE_REDIRECT_URI_PROD');
   }
 
-  async authenticate(token: string, userEmail?: string) {
+  async authenticate(token: string, schoolName?: string) {
     try {
       const loginTicket = await this.oAuthClient.verifyIdToken({
         idToken: token,
       });
-      const { email, sub: googleId } = loginTicket.getPayload();
+      const { email, sub: googleId, name } = loginTicket.getPayload();
       const user = await this.userRepository.findOneBy({ googleId });
       if (user) {
         const token = await this.authService.generateTokens(user);
         return {
           userId: user.id,
           accessToken: token.accessToken,
-          role: user.role
+          role: user.role,
         };
-      } else if (userEmail) {
-        const user = await this.userRepository.findOne({ where: { email: userEmail } });
+      } else if (schoolName) {
+        let user = await this.userRepository.findOne({ where: { email } });
       
         if (!user) {
-          throw new UnauthorizedException('No user found with the provided email.');
+          const { firstName, lastName } = splitName(name);
+
+          user = this.userRepository.create({
+            email,
+            firstName,
+            lastName,
+            googleId,
+            schoolName,
+            registrationLinkId: null,
+          });
+        } else {
+          user.googleId = googleId;
+          user.firstName = name;
+          user.registrationLinkId = null;
         }
       
-        user.googleId = googleId;
-        user.registrationLinkId = null;
-        await this.userRepository.save(user);
-      
-        return this.authService.generateTokens(user);
+        let newUser= await this.userRepository.save(user);
+
+        const token = await this.authService.generateTokens(newUser);
+        return {
+          userId: user.id,
+          accessToken: token.accessToken,
+          role: user.role,
+        };
       }
     } catch (err) {
       const pgUniqueViolationErrorCode = '23505';
@@ -69,4 +85,13 @@ export class GoogleAuthenticationService implements OnModuleInit {
       throw new UnauthorizedException();
     }
   }
+}
+
+function splitName(fullName: string): { firstName: string; lastName: string } {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length <= 1) {
+    return { firstName: parts[0] || '', lastName: '' };
+  }
+  const [firstName, ...rest] = parts;
+  return { firstName, lastName: rest.join(' ') };
 }
