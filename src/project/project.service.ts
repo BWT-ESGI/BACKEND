@@ -6,6 +6,9 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { Promotion } from '@/promotion/entities/promotion.entity';
 import { Group } from '@/group/entities/group.entity';
 import { Report } from '@/report/entities/report.entity';
+import { User } from '@/users/entities/user.entity';
+import { Role } from '@/users/enums/role.enum';
+import { ProjectStatus } from './enums/project-status.enum';
 
 @Injectable()
 export class ProjectService {
@@ -20,10 +23,41 @@ export class ProjectService {
     private readonly reportRepository: Repository<Report>,
   ) {}
 
-  async findAll(): Promise<Project[]> {
-    return this.projectRepository.find({
-      relations: ['promotion', 'groups', 'groups.members'],
-    });
+  async findAll(user: User): Promise<Project[]> {
+    const userId = user.sub;
+    const qb = this.projectRepository
+      .createQueryBuilder('project')
+  
+    if (user.role === Role.Student) {
+      qb
+        .where('project.status != :draft', { draft: ProjectStatus.DRAFT })
+        .innerJoin('project.promotion', 'promotion')
+        .innerJoin(
+          'promotion.students',
+          'student',
+          'student.id = :uid',
+          { uid: userId },
+        )
+        .addSelect(['promotion.id', 'promotion.name'])
+        .leftJoinAndSelect('project.groups', 'group')
+        .leftJoinAndSelect('group.members', 'member');
+        
+    }
+    else {
+      qb
+        .innerJoin('project.promotion', 'promotion')
+        .innerJoin(
+          'promotion.teacher',
+          'teacher',
+          'promotion.teacherId = :uid',
+          { uid: userId },
+        )
+        .leftJoinAndSelect('project.groups', 'group')
+        .leftJoinAndSelect('group.members', 'member');
+    }
+  
+    qb.distinct(true);
+    return qb.getMany();
   }
 
   async create(dto: CreateProjectDto): Promise<Project> {
