@@ -10,6 +10,7 @@ import { AuthenticationService } from '../authentication.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { Role } from '@/users/enums/role.enum';
 
 @Injectable()
 export class GoogleAuthenticationService implements OnModuleInit {
@@ -61,6 +62,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
             googleId,
             schoolName,
             registrationLinkId: null,
+            role: Role.Teacher,
           });
         } else {
           user.googleId = googleId;
