@@ -5,6 +5,7 @@ import {
   OneToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
+  ManyToMany,
 } from 'typeorm';
 
 import { User } from '@/users/entities/user.entity';
@@ -20,7 +21,7 @@ export class Promotion {
   @ManyToOne(() => User, (user) => user.promotions, { eager: true })
   teacher: User;
 
-  @OneToMany(() => User, (student) => student.promotion)
+  @ManyToMany(() => User, (user) => user.promotions)
   students: User[];
 
   @OneToMany(() => Project, (project) => project.promotion)

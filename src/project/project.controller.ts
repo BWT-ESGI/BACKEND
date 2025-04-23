@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, NotFoundException } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -11,7 +11,9 @@ import { User as UserEntity } from '@/users/entities/user.entity';
 @ApiTags('Projects')
 @Controller('projects')
 export class ProjectController {
-  constructor(private readonly projectService: ProjectService) {}
+  constructor(
+    private readonly projectService: ProjectService,
+  ) {}
 
   @Post()
   @Auth(AuthType.Bearer)
@@ -26,16 +28,26 @@ export class ProjectController {
   }
 
   @Get(':id')
+  @Auth(AuthType.Bearer)
   findOne(@Param('id') id: string) {
     return this.projectService.findOne(id);
   }
 
+  
+  @Get('/findProjectForStudent/:id')
+  @Auth(AuthType.Bearer)
+  findOneForStudent(@Param('id') id: string, @User() user: UserEntity) {
+    return this.projectService.findOneForStudent(id, user);
+  }
+
   @Patch(':id')
+  @Auth(AuthType.Bearer)
   update(@Param('id') id: string, @Body() updateDto: Partial<Project>) {
     return this.projectService.updateProject(id, updateDto);
   }
 
   @Delete(':id')
+  @Auth(AuthType.Bearer)
   remove(@Param('id') id: string) {
     return this.projectService.remove(id);
   }

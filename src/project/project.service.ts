@@ -28,20 +28,20 @@ export class ProjectService {
     const qb = this.projectRepository
       .createQueryBuilder('project')
   
+
     if (user.role === Role.Student) {
+      // 1) étudiant → uniquement les projets de sa promo
+      //    ET uniquement les groupes où il est membre
       qb
-        .where('project.status != :draft', { draft: ProjectStatus.DRAFT })
         .innerJoin('project.promotion', 'promotion')
         .innerJoin(
           'promotion.students',
-          'student',
-          'student.id = :uid',
+          'promoStudent',
+          'promoStudent.id = :uid',
           { uid: userId },
         )
-        .addSelect(['promotion.id', 'promotion.name'])
         .leftJoinAndSelect('project.groups', 'group')
         .leftJoinAndSelect('group.members', 'member');
-        
     }
     else {
       qb
@@ -112,6 +112,31 @@ export class ProjectService {
       throw new NotFoundException('Project not found');
     }
   
+    return project;
+  }
+
+  
+  async findOneForStudent(id: string, user: User): Promise<Project> {
+    const project = await this.projectRepository.findOne({
+      where: { id },
+      relations: [
+        'promotion',
+        'promotion.students',
+        'groups',
+        'groups.members',
+      ],
+    });
+    if (!project) {
+      throw new NotFoundException('Projet introuvable');
+    }
+
+    if (user.role === Role.Student) {
+      const uid = user.id;
+      project.groups = project.groups.filter((g) =>
+        g.members.some((m) => m.id === uid),
+      );
+    }
+
     return project;
   }
 

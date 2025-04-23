@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Promotion } from './entities/promotion.entity';
@@ -44,9 +44,12 @@ export class PromotionService {
         }
   
         if (student) {
-          student.promotion = savedPromotion;
+          // on s’assure que le tableau existe
+          student.promotions = student.promotions ?? [];
+          // on y ajoute la promotion
+          student.promotions.push(savedPromotion);
           studentEntities.push(student);
-        }
+        }        
       }
   
       await this.userRepository.save(studentEntities);
@@ -85,8 +88,15 @@ export class PromotionService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.userRepository.update({ promotion: { id } }, { promotion: null });
+    const promo = await this.promotionRepository.findOne({ where: { id } });
+    if (!promo) {
+      throw new NotFoundException(`Promotion ${id} introuvable`);
+    }
 
+    await this.promotionRepository
+      .createQueryBuilder()
+      .relation(Promotion, 'students')
+      .of(id);
     await this.promotionRepository.delete(id);
   }
 }
