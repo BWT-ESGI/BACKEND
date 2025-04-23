@@ -7,12 +7,14 @@ import { AuthType } from '@/iam/authentication/enums/auth-type.enum';
 import { Auth } from '@/iam/authentication/decorators/auth.decorator';
 import { User } from '@/common/decorators/user.decorator';
 import { User as UserEntity } from '@/users/entities/user.entity';
+import { FindDetailedProjectService } from './FindDetailedProjectService.service';
 
 @ApiTags('Projects')
 @Controller('projects')
 export class ProjectController {
   constructor(
     private readonly projectService: ProjectService,
+    private readonly findDetailedProjectService: FindDetailedProjectService,
   ) {}
 
   @Post()
@@ -37,7 +39,7 @@ export class ProjectController {
   @Get('/findProjectForStudent/:id')
   @Auth(AuthType.Bearer)
   findOneForStudent(@Param('id') id: string, @User() user: UserEntity) {
-    return this.projectService.findOneForStudent(id, user);
+    return this.findDetailedProjectService.findOneDetailed(id, user);
   }
 
   @Patch(':id')

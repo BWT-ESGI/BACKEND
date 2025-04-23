@@ -6,11 +6,12 @@ import { Project } from './entities/project.entity';
 import { Promotion } from '@/promotion/entities/promotion.entity';
 import { Group } from '@/group/entities/group.entity';
 import { Report } from '@/report/entities/report.entity';
+import { FindDetailedProjectService } from './FindDetailedProjectService.service'; 
 
 @Module({
   imports: [TypeOrmModule.forFeature([Project, Promotion, Group, Report])],
   controllers: [ProjectController],
-  providers: [ProjectService],
-  exports: [ProjectService],
+  providers: [ProjectService, FindDetailedProjectService],
+  exports: [ProjectService, FindDetailedProjectService],
 })
 export class ProjectModule {}
