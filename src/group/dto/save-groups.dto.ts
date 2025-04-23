@@ -9,8 +9,8 @@ export class SaveGroupDto {
   name: string;
 
   @IsInt()
-  projectId: number;
+  projectId: string;
 
   @IsArray()
-  memberIds: number[];
+  memberIds: string[];
 }

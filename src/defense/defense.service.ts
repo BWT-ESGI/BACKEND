@@ -45,4 +45,16 @@ export class DefenseService {
       throw new NotFoundException(`Soutenance #${id} introuvable`);
     }
   }
+
+  async findByActiveGroups(projectId: string): Promise<Defense[]> {
+    return this.defenseRepo
+      .createQueryBuilder('defense')
+      // on récupère le groupe relié, alias "grp"
+      .innerJoinAndSelect('defense.group', 'grp')
+      // on ne garde que les groupes ayant au moins un membre
+      .innerJoinAndSelect('grp.members', 'member')
+      .where('grp.projectId = :projectId', { projectId })
+      .orderBy('defense.start', 'ASC')
+      .getMany();
+  }
 }

@@ -5,11 +5,15 @@ import { UpdateGroupDto } from './dto/update-group.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Group } from './entities/group.entity';
 import { SaveGroupDto } from './dto/save-groups.dto';
+import { SaveGroupService } from './saveGroup.service';
 
 @ApiTags('Groups')
 @Controller('groups')
 export class GroupController {
-  constructor(private readonly groupService: GroupService) {}
+  constructor(
+    private readonly groupService: GroupService,
+    private readonly saveGroupService: SaveGroupService,
+  ) {}
 
   @Post()
   create(@Body() createGroupDto: CreateGroupDto) {
@@ -46,7 +50,7 @@ export class GroupController {
     @Param('projectId') projectId: string,
     @Body() groups: SaveGroupDto[],
   ) {
-    return this.groupService.saveGroupsForProject(projectId, groups);
+    return this.saveGroupService.saveGroupsForProject(projectId, groups);
   }
 
   @Get('by-project/:projectId')

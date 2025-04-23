@@ -9,6 +9,7 @@ module.exports = {
   migrations: ['dist/db/migrations/*{.ts,.js}'],
   seeds: ['dist/db/seeds/*.js'],
   factories: ['dist/db/factories/*.js'],
+  subscribers: ['dist/**/group/*.subscriber{.ts,.js}'],
   cli: {
     migrationsDir: 'db/migrations',
   },

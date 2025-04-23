@@ -7,6 +7,8 @@ import { UpdateGroupDto } from './dto/update-group.dto';
 import { Project } from '@/project/entities/project.entity';
 import { User } from '@/users/entities/user.entity';
 import { SaveGroupDto } from './dto/save-groups.dto';
+import { Defense } from '@/defense/entities/defense.entity';
+import { Month } from '@/defense/enums/month.enum';
 
 @Injectable()
 export class GroupService {
@@ -17,6 +19,8 @@ export class GroupService {
     private readonly projectRepository: Repository<Project>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Defense)
+    private readonly defenseRepository: Repository<Defense>,
   ) {}
 
   async findByProjectId(projectId: string): Promise<Group[]> {
@@ -52,39 +56,6 @@ export class GroupService {
     await this.groupRepository.delete(id);
   }
 
-  async saveGroupsForProject(projectId: string, groupDtos: SaveGroupDto[]): Promise<Group[]> {
-    const project = await this.projectRepository.findOneOrFail({ where: { id: projectId } });
-
-    const savedGroups: Group[] = [];
-
-    for (const dto of groupDtos) {
-      const users = await this.userRepository.findByIds(dto.memberIds);
-
-      let group: Group;
-
-      if (dto.id) {
-        // Update existing
-        group = await this.groupRepository.findOneOrFail({
-          where: { id: String(dto.id) },
-          relations: ['members'],
-        });
-        group.name = dto.name;
-        group.members = users;
-      } else {
-        // Create new
-        group = this.groupRepository.create({
-          name: dto.name,
-          project,
-          members: users,
-        });
-      }
-
-      const saved = await this.groupRepository.save(group);
-      savedGroups.push(saved);
-    }
-
-    return savedGroups;
-  }
 
   async findWithMembersAndDefenses(projectId: string): Promise<Group[]> {
     return this.groupRepository
