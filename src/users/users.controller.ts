@@ -16,6 +16,7 @@ import { Auth } from 'src/iam/authentication/decorators/auth.decorator';
 import { AuthType } from 'src/iam/authentication/enums/auth-type.enum';
 import { Roles } from 'src/iam/authorization/decorators/roles.decorator';
 import { Role } from './enums/role.enum';
+import { CreateMultipleStudentsDto } from './dto/create-multiple-students';
 
 @ApiTags('Users')
 @ApiBearerAuth('jwt')
@@ -28,6 +29,13 @@ export class UsersController {
   @Roles(Role.Teacher)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
+  }
+
+  @Post('add-multiple-students')
+  @Auth(AuthType.Bearer)
+  @Roles(Role.Teacher)
+  createMultipleStudents(@Body() createUserDto: CreateMultipleStudentsDto[]) {
+    return this.usersService.createMultipleStudents(createUserDto);
   }
 
   @Get()

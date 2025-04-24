@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Role } from './enums/role.enum';
+import { CreateMultipleStudentsDto } from './dto/create-multiple-students';
 
 @Injectable()
 export class UsersService {
@@ -15,6 +16,19 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create(createUserDto);
     return await this.userRepository.save(newUser);
+  }
+
+  async createMultipleStudents(createMultipleStudentsDto: CreateMultipleStudentsDto[]): Promise<User[]> {
+    const newUsers = this.userRepository.create(
+      createMultipleStudentsDto.map((dto) => ({
+      email: dto.email,
+      role: Role.Student,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      registrationLinkId: crypto.randomUUID(),
+      })),
+    );
+    return await this.userRepository.save(newUsers);
   }
 
   async findAll(): Promise<User[]> {
