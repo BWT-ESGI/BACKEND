@@ -49,7 +49,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
           accessToken: token.accessToken,
           role: user.role,
         };
-      } else if (schoolName) {
+      } else{
         let user = await this.userRepository.findOne({ where: { email } });
       
         if (!user) {
@@ -63,14 +63,16 @@ export class GoogleAuthenticationService implements OnModuleInit {
             schoolName,
             registrationLinkId: null,
             role: Role.Teacher,
+            
           });
-        } else {
-          user.googleId = googleId;
-          user.firstName = name;
-          user.registrationLinkId = null;
+          if (schoolName) {
+            user.schoolName = schoolName;
+          }else {
+            user.registrationLinkId = null;
         }
-      
-        let newUser= await this.userRepository.save(user);
+      }
+      let newUser= await this.userRepository.save(user);
+
 
         const token = await this.authService.generateTokens(newUser);
         return {

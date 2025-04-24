@@ -3,5 +3,5 @@ import { IsNotEmpty } from 'class-validator';
 export class GoogleTokenDto {
   @IsNotEmpty()
   token: string;
-  schoolName: string;
+  schoolName?: string;
 }
