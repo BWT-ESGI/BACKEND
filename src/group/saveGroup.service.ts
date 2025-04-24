@@ -96,24 +96,25 @@ export class SaveGroupService {
 
   private async syncDefenses(group: Group): Promise<void> {
     const hasMembers = group.members.length > 0;
-    const defenses = group.defenses || [];
-
+    const existing = group.defense;
+  
     if (hasMembers) {
-      if (defenses.length === 0) {
+      if (!existing) {
         const now = new Date();
-        const monthNames = Object.values(Month) as string[];
-        const monthName = monthNames[now.getMonth()];
+        const monthValue = Month[now.getMonth()]; 
         const def = this.defenseRepository.create({
           name: `${group.name} – Soutenance`,
           start: now,
           end: new Date(now.getTime() + 30 * 60000),
-          month: monthName as Month,
+          month: monthValue,
           group,
         });
         await this.defenseRepository.save(def);
       }
-    } else if (defenses.length > 0) {
-      await this.defenseRepository.remove(defenses);
+    } else {
+      if (existing) {
+        await this.defenseRepository.remove(existing);
+      }
     }
   }
 }

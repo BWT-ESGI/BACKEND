@@ -15,15 +15,15 @@ services:
       - "${REDIS_PORT_EXTERNAL}:6379"
     restart: always
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: backend
-    restart: always
-    ports:
-      - "${APP_PORT}:3000"
-    depends_on:
-      - db
-    volumes:
-      - ./src:/app/src
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: backend
+  #   restart: always
+  #   ports:
+  #     - "${APP_PORT}:3000"
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - ./src:/app/src

@@ -4,7 +4,8 @@ import {
   JoinTable,
   ManyToOne,
   PrimaryGeneratedColumn,
-  OneToOne
+  OneToOne,
+  JoinColumn
 } from 'typeorm';
 
 import { Group } from '@/group/entities/group.entity';
@@ -17,6 +18,7 @@ export class Report {
   @Column('text')
   content: string; // Markdown ou HTML
 
-  @ManyToOne(() => Group)
+  @OneToOne(() => Group, (group) => group.report)
+  @JoinColumn()
   group: Group;
 }

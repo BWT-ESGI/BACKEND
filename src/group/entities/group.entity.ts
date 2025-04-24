@@ -4,14 +4,15 @@ import {
   JoinTable,
   ManyToOne,
   ManyToMany,
-  OneToMany,
   PrimaryGeneratedColumn,
   OneToOne,
+  JoinColumn,
 } from 'typeorm';
 
 import { User } from '@/users/entities/user.entity';
 import { Project } from '@/project/entities/project.entity';
 import { Defense } from '@/defense/entities/defense.entity';
+import { Report } from '@/report/entities/report.entity';
 
 @Entity()
 export class Group {
@@ -28,7 +29,11 @@ export class Group {
   project: Project;
 
   @OneToOne(() => Defense, (defense) => defense.group, { cascade: true })
-  defenses: Defense[];
+  defense: Defense;
+
+  @OneToOne(() => Group, (group) => group.report)
+  @JoinColumn()
+  report: Report;
 
   @ManyToMany(() => User)
   @JoinTable()

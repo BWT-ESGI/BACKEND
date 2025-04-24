@@ -28,7 +28,7 @@ export class Defense {
   @Column({ type: 'enum', enum: Month })
   month: Month;
 
-  @OneToOne(() => Group, (group) => group.defenses, { onDelete: 'CASCADE' })
+  @OneToOne(() => Group, (group) => group.defense, { onDelete: 'CASCADE' })
   @JoinColumn()
   group: Group;
 
