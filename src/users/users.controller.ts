@@ -43,6 +43,13 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('students')
+  @Auth(AuthType.Bearer)
+  @Roles(Role.Teacher)
+  findAllStudents() {
+    return this.usersService.findAllStudents();
+  }
+
   @Get(':id')
   @Auth(AuthType.Bearer)
   findOne(@Param('id') id: string) {

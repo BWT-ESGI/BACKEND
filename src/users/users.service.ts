@@ -35,6 +35,12 @@ export class UsersService {
     return await this.userRepository.find();
   }
 
+  async findAllStudents(): Promise<User[]> {
+    return await this.userRepository.find({
+      where: { role: Role.Student },
+    });
+  }
+
   async findOne(id: string): Promise<User | undefined> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {

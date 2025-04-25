@@ -6,6 +6,7 @@ import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { UpdatePromotionDto } from './dto/update-promotion.dto';
 import { User } from '@/users/entities/user.entity';
 import { UsersService } from '@/users/users.service';
+import { UpdateStudentsPromotionDto } from './dto/update-students-promotion.dto';
 
 @Injectable()
 export class PromotionService {
@@ -19,42 +20,46 @@ export class PromotionService {
 
   async create(createPromotionDto: CreatePromotionDto): Promise<Promotion> {
     const { name, teacherId, studentIds } = createPromotionDto;
-  
-    const teacher = await this.userRepository.findOne({ where: { id: teacherId } });
+
+    const teacher = await this.userRepository.findOne({
+      where: { id: teacherId },
+    });
     if (!teacher) throw new Error('Teacher not found');
-  
+
     const promotion = this.promotionRepository.create({
       name,
       teacher,
     });
-  
+
     const savedPromotion = await this.promotionRepository.save(promotion);
-  
+
     const studentEntities: User[] = [];
-  
+
     if (studentIds && studentIds.length > 0) {
       for (const idOrEmail of studentIds) {
         let student: User | null = null;
-  
+
         // Si c'est un email
         if (idOrEmail.includes('@')) {
           student = await this.userService.createNewUserFromEmail(idOrEmail);
         } else {
-          student = await this.userRepository.findOne({ where: { id: idOrEmail } });
+          student = await this.userRepository.findOne({
+            where: { id: idOrEmail },
+          });
         }
-  
+
         if (student) {
           // on s’assure que le tableau existe
           student.promotions = student.promotions ?? [];
           // on y ajoute la promotion
           student.promotions.push(savedPromotion);
           studentEntities.push(student);
-        }        
+        }
       }
-  
+
       await this.userRepository.save(studentEntities);
     }
-  
+
     return this.promotionRepository.findOne({
       where: { id: savedPromotion.id },
       relations: ['teacher', 'students'],
@@ -68,7 +73,10 @@ export class PromotionService {
   }
 
   findOne(id: string): Promise<Promotion> {
-    return this.promotionRepository.findOne({ where: { id } , relations: ['teacher', 'students', 'projects'],} );
+    return this.promotionRepository.findOne({
+      where: { id },
+      relations: ['teacher', 'students', 'projects'],
+    });
   }
 
   async findAllByUser(userId: string): Promise<Promotion[]> {
@@ -81,10 +89,40 @@ export class PromotionService {
       .orWhere('student.id = :userId', { userId })
       .getMany();
   }
-  
-  async update(id: string, updatePromotionDto: UpdatePromotionDto): Promise<Promotion> {
+
+  async update(
+    id: string,
+    updatePromotionDto: UpdatePromotionDto,
+  ): Promise<Promotion> {
     await this.promotionRepository.update(id, updatePromotionDto);
     return this.findOne(id);
+  }
+
+  async editStudents(
+    id: string,
+    updateStudentsPromotionDto: UpdateStudentsPromotionDto,
+  ): Promise<Promotion> {
+    const { ids: studentIds } = updateStudentsPromotionDto;
+
+    const promotion = await this.promotionRepository.findOne({
+      where: { id },
+      relations: ['students'],
+    });
+    if (!promotion) {
+      throw new NotFoundException(`Promotion ${id} introuvable`);
+    }
+
+    const students = await this.userRepository.findBy({
+      id: In(studentIds),
+    });
+
+    promotion.students = students;
+    await this.promotionRepository.save(promotion);
+
+    return this.promotionRepository.findOne({
+      where: { id },
+      relations: ['teacher', 'students', 'projects'],
+    });
   }
 
   async remove(id: string): Promise<void> {
