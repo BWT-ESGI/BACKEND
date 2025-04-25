@@ -28,10 +28,17 @@ export class Group {
   @ManyToOne(() => Project, (project) => project.groups,  { onDelete: 'CASCADE' })
   project: Project;
 
-  @OneToOne(() => Defense, (defense) => defense.group, { cascade: true })
+  @OneToOne(() => Defense, (defense) => defense.group, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()  
   defense: Defense;
 
-  @OneToOne(() => Group, (group) => group.report)
+  @OneToOne(() => Report, (report) => report.group, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   report: Report;
 

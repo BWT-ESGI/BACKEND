@@ -52,7 +52,6 @@ export class SaveGroupService {
   }
 
   private async loadUsers(memberIds: string[]): Promise<User[]> {
-    // Correction : utiliser userRepository, pas groupRepository
     return this.userRepository.findByIds(memberIds);
   }
 
@@ -64,7 +63,7 @@ export class SaveGroupService {
     if (dto.id) {
       const group = await this.groupRepository.findOne({
         where: { id: dto.id },
-        relations: ['members', 'defenses'],
+        relations: ['members', 'defense'],
       });
       if (!group) {
         throw new NotFoundException(`Group ${dto.id} not found`);
@@ -84,7 +83,7 @@ export class SaveGroupService {
   private async reloadFullGroup(id: string): Promise<Group> {
     const full = await this.groupRepository.findOne({
       where: { id },
-      relations: ['members', 'defenses'],
+      relations: ['members', 'defense'],
     });
     if (!full) {
       throw new NotFoundException(

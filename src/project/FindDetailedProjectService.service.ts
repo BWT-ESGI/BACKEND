@@ -54,7 +54,7 @@ export class FindDetailedProjectService {
     }
 
     // Dans les deux cas, on charge soutenances, rapports et évaluations pour les groupes sélectionnés
-    qb.leftJoinAndSelect('group.defenses', 'defense')
+    qb.leftJoinAndSelect('group.defense', 'defense')
       .leftJoinAndSelect('group.reports', 'report')
       .leftJoinAndSelect('group.evaluations', 'evaluation')
       .distinct(true);

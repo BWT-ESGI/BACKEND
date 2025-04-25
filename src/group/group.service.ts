@@ -61,7 +61,7 @@ export class GroupService {
     return this.groupRepository
       .createQueryBuilder('group')
       .leftJoinAndSelect('group.members', 'member')
-      .leftJoinAndSelect('group.defenses', 'defense')
+      .leftJoinAndSelect('group.defense', 'defense')
       .where('group.projectId = :projectId', { projectId })
       .orderBy('defense.start', 'ASC')
       .getMany();
