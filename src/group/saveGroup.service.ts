@@ -17,7 +17,7 @@ export class SaveGroupService {
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,        // <-- ajouté
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Defense)
     private readonly defenseRepository: Repository<Defense>,
   ) { }
@@ -100,7 +100,9 @@ export class SaveGroupService {
     if (hasMembers) {
       if (!existing) {
         const now = new Date();
-        const monthValue = Month[now.getMonth()]; 
+        const monthNames = Object.values(Month) as Month[];
+        const monthValue = monthNames[now.getMonth()];
+  
         const def = this.defenseRepository.create({
           name: `${group.name} – Soutenance`,
           start: now,
@@ -108,7 +110,11 @@ export class SaveGroupService {
           month: monthValue,
           group,
         });
-        await this.defenseRepository.save(def);
+  
+        const savedDef = await this.defenseRepository.save(def);
+  
+        group.defense = savedDef;
+        await this.groupRepository.save(group);
       }
     } else {
       if (existing) {
