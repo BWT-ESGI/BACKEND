@@ -72,6 +72,7 @@ export class ProjectService {
     const project = this.projectRepository.create({
       name: dto.name,
       description: dto.description,
+      nbGroups: 16,
       promotion,
     });
   
