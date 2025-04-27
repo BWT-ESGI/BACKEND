@@ -11,9 +11,9 @@ export class ReportController {
   @Post()
   async create(
     @Body('content') content: string,
-    @Body('projectId') projectId: string,
+    @Body('groupId') groupId: string,
   ): Promise<Report> {
-    return this.reportService.create(content, projectId);
+    return this.reportService.create(content, groupId);
   }
 
   @Get()
@@ -26,9 +26,9 @@ export class ReportController {
     return this.reportService.findOne(id);
   }
 
-  @Get('/by-project/:id')
-  async findAllReportByProject(@Param('id') id: string): Promise<Report[]> {
-    return this.reportService.findByProjectId(id);
+  @Get('/by-group/:id')
+  async findAllReportByGroup(@Param('id') id: string): Promise<Report[]> {
+    return this.reportService.findByGroupId(id);
   }
 
   @Put(':id')

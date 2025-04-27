@@ -56,6 +56,31 @@ export class GroupService {
     await this.groupRepository.delete(id);
   }
 
+  async leaveGroup(idGroup: string, id: string): Promise<Group> {
+    const group = await this.groupRepository.findOne({
+      where: { id: idGroup },
+      relations: ['members'],
+    });
+    if (!group) throw new NotFoundException('Group not found');
+    const user = await this.userRepository.findOne({ where: { id: id } });
+    if (!user) throw new NotFoundException('User not found');
+    group.members = group.members.filter((member) => member.id !== user.id);
+    await this.groupRepository.save(group);
+    return group;
+  }
+
+  async joinGroup(idGroup: string, id: string): Promise<Group> {
+    const group = await this.groupRepository.findOne({
+      where: { id: idGroup },
+      relations: ['members'],
+    });
+    if (!group) throw new NotFoundException('Group not found');
+    const user = await this.userRepository.findOne({ where: { id: id } });
+    if (!user) throw new NotFoundException('User not found');
+    group.members.push(user);
+    await this.groupRepository.save(group);
+    return group;
+  }
 
   async findWithMembersAndDefenses(projectId: string): Promise<Group[]> {
     return this.groupRepository

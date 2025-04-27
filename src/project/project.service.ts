@@ -25,27 +25,23 @@ export class ProjectService {
 
   async findAll(user: User): Promise<Project[]> {
     const userId = user.sub;
-    const qb = this.projectRepository
-      .createQueryBuilder('project')
-  
+    const qb = this.projectRepository.createQueryBuilder('project');
 
     if (user.role === Role.Student) {
-      // 1) étudiant → uniquement les projets de sa promo
-      //    ET uniquement les groupes où il est membre
-      qb
-        .innerJoin('project.promotion', 'promotion')
-        .innerJoin(
-          'promotion.students',
-          'promoStudent',
-          'promoStudent.id = :uid',
-          { uid: userId },
-        )
-        .leftJoinAndSelect('project.groups', 'group')
-        .leftJoinAndSelect('group.members', 'member');
-    }
-    else {
-      qb
-        .innerJoin('project.promotion', 'promotion')
+      qb.innerJoin('project.promotion', 'promotion')
+      .innerJoin(
+        'promotion.students',
+        'promoStudent',
+        'promoStudent.id = :uid',
+        { uid: userId },
+      )
+      .leftJoinAndSelect('project.groups', 'group')
+      .leftJoinAndSelect('group.members', 'member')
+      .andWhere('project.status != :status', {
+        status: ProjectStatus.DRAFT,
+      })
+    } else {
+      qb.innerJoin('project.promotion', 'promotion')
         .innerJoin(
           'promotion.teacher',
           'teacher',
@@ -55,7 +51,7 @@ export class ProjectService {
         .leftJoinAndSelect('project.groups', 'group')
         .leftJoinAndSelect('group.members', 'member');
     }
-  
+
     qb.distinct(true);
     return qb.getMany();
   }
@@ -64,59 +60,64 @@ export class ProjectService {
     const promotion = await this.promotionRepository.findOne({
       where: { id: dto.promotionId },
     });
-  
+
     if (!promotion) {
       throw new NotFoundException('Promotion non trouvée');
     }
-  
+
     const project = this.projectRepository.create({
       name: dto.name,
       description: dto.description,
       nbGroups: 16,
       promotion,
     });
-  
+
     const savedProject = await this.projectRepository.save(project);
-  
+
     // Générer les 16 groupes
     const generatedGroups = Array.from({ length: 16 }, (_, i) =>
       this.groupRepository.create({
         name: `Groupe ${String.fromCharCode(65 + i)}`,
         project: savedProject,
         members: [],
-      })
+      }),
     );
-  
+
     const savedGroups = await this.groupRepository.save(generatedGroups);
-  
+
     const reports = savedGroups.map((group) =>
       this.reportRepository.create({
         content: '',
         group,
-      })
+      }),
     );
-  
+
     await this.reportRepository.save(reports);
-  
+
     savedProject.groups = savedGroups;
-  
+
     return savedProject;
   }
 
   async findOne(id: string): Promise<Project> {
     const project = await this.projectRepository.findOne({
       where: { id },
-      relations: ['promotion', 'promotion.students', 'groups', 'groups.members'],
+      relations: [
+        'promotion',
+        'promotion.students',
+        'groups',
+        'groups.members',
+        
+      ],
     });
-  
+
     if (!project) {
       throw new NotFoundException('Project not found');
     }
-  
+
     return project;
   }
 
-  
   async findOneForStudent(id: string, user: User): Promise<Project> {
     const project = await this.projectRepository.findOne({
       where: { id },
@@ -141,7 +142,10 @@ export class ProjectService {
     return project;
   }
 
-  async updateProject(id: string, updateDto: Partial<Project>): Promise<Project> {
+  async updateProject(
+    id: string,
+    updateDto: Partial<Project>,
+  ): Promise<Project> {
     await this.findOne(id);
     await this.projectRepository.update(id, updateDto);
     return await this.findOne(id);

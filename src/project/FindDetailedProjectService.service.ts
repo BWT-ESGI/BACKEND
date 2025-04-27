@@ -36,8 +36,8 @@ export class FindDetailedProjectService {
       .leftJoinAndSelect('project.promotion', 'promotion');
 
     if (user.role === Role.Student) {
-      // étudiant → on ne récupère que ses propres groupes
-      qb.innerJoin(
+      // étudiant → on ne récupère que son propre groupe
+      qb.innerJoinAndSelect(
         'project.groups',
         'group',
       )

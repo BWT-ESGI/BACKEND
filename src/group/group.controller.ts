@@ -40,6 +40,22 @@ export class GroupController {
     return this.groupService.remove(id);
   }
 
+  @Delete(':idGroup/students/:id/leave')
+  async leaveGroup(
+    @Param('idGroup') idGroup: string,
+    @Param('id') id: string,
+  ): Promise<Group> {
+    return this.groupService.leaveGroup(idGroup, id);
+  }
+
+  @Post(':idGroup/students/:id/join')
+  async joinGroup(
+    @Param('idGroup') idGroup: string,
+    @Param('id') id: string,
+  ): Promise<Group> {
+    return this.groupService.joinGroup(idGroup, id);
+  }
+
   @Get('by-project/:projectId')
   async findByProject(@Param('projectId') projectId: string): Promise<Group[]> {
     return this.groupService.findByProjectId(projectId);

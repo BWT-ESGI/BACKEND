@@ -33,7 +33,6 @@ export class ReportService {
     return this.reportRepository.find();
   }
 
-  // Méthode pour trouver un rapport spécifique
   async findOne(id: string): Promise<Report> {
     if (id === undefined || id === null) {
       throw new Error('Invalid report ID');
@@ -42,9 +41,9 @@ export class ReportService {
     return this.reportRepository.findOne({ where: { id: id }, relations: ['group'] });
   }
 
-  async findByProjectId(projectId: string): Promise<Report[]> {
+  async findByGroupId(groupId: string): Promise<Report[]> {
     return this.reportRepository.find({
-      where: { group: { project: { id: projectId } } },
+      where: { group: { id: groupId } },
       relations: ['group', 'group.project'],
     });
   }
