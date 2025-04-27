@@ -1,8 +1,24 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
 import { Group } from '@/group/entities/group.entity';
 import { Promotion } from '@/promotion/entities/promotion.entity';
-export type ProjectStatus = "draft" | "published" | "archived" | "active" | "inactive";
-export type GroupCompositionType = "manual" | "random" | "student_choice";
+import { ProjectNotationGrid } from '@/projectNotationGrid/entities/projectNotationGrid.entity';
+
+export type ProjectStatus =
+  | 'draft'
+  | 'published'
+  | 'archived'
+  | 'active'
+  | 'inactive';
+export type GroupCompositionType = 'manual' | 'random' | 'student_choice';
 
 @Entity()
 export class Project {
@@ -39,6 +55,9 @@ export class Project {
 
   @OneToMany(() => Group, (group) => group.project)
   groups: Group[];
+
+  @OneToMany(() => ProjectNotationGrid, (png) => png.project, { cascade: true })
+  notationGrids: ProjectNotationGrid[];
 
   @CreateDateColumn()
   createdAt: Date;
