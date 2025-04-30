@@ -2,16 +2,15 @@ import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validato
 
 export class SaveGroupDto {
   @IsOptional()
-  @IsInt()
-  id?: number;
+  id?: string;
 
   @IsString()
   @IsNotEmpty()
   name: string;
 
   @IsInt()
-  projectId: number;
+  projectId: string;
 
   @IsArray()
-  memberIds: number[];
+  memberIds: string[];
 }

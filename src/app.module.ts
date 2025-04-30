@@ -11,6 +11,7 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import { ReportModule } from './report/report.module';
 import { DeliverableModule } from './deliverable/deliverable.module';
 import { GroupModule } from './group/group.module';
+import { DefenseModule } from './defense/defense.module';
 import config from './config.ts';
 
 @Module({
@@ -25,6 +26,7 @@ import config from './config.ts';
         },
       }
     ),
+    DefenseModule,
     GroupModule,
     DeliverableModule,
     SubmissionModule,

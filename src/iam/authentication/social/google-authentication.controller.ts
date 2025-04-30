@@ -15,6 +15,6 @@ export class GoogleAuthenticationController {
 
   @Post()
   authenticate(@Body() tokenDto: GoogleTokenDto) {
-    return this.googleAuthService.authenticate(tokenDto.token, tokenDto.email);
+    return this.googleAuthService.authenticate(tokenDto.token, tokenDto.schoolName);
   }
 }

@@ -103,7 +103,7 @@ export class AuthenticationService {
         issuer: this.jwtConfiguration.issuer,
       });
       const user = await this.usersRepository.findOneByOrFail({
-        id: sub,
+        id: sub.toString(),
       });
       const isValid = await this.refreshTokenIdsStorage.validate(
         user.id,
@@ -124,7 +124,7 @@ export class AuthenticationService {
     }
   }
 
-  private async signToken<T>(userId: number, expiresIn: number, payload?: T) {
+  private async signToken<T>(userId: string, expiresIn: number, payload?: T) {
     return await this.jwtService.signAsync(
       {
         sub: userId,

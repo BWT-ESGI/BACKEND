@@ -25,9 +25,6 @@ export class Evaluation {
   @Column({ nullable: true })
   comment?: string;
 
-  @ManyToOne(() => Project)
-  project: Project;
-
   @ManyToOne(() => Group)
   group: Group;
 }

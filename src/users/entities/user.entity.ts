@@ -5,6 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   ManyToOne,
+  ManyToMany,
 } from 'typeorm';
 import { Role } from '../enums/role.enum';
 import { Promotion } from '@/promotion/entities/promotion.entity';
@@ -13,8 +14,8 @@ import { Submission } from '@/submission/entities/submission.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true, nullable: true })
   email: string;
@@ -38,6 +39,9 @@ export class User {
   username: string;
 
   @Column({ nullable: true })
+  schoolName: string;
+
+  @Column({ nullable: true })
   firstName: string;
 
   @Column({ nullable: true })
@@ -49,15 +53,14 @@ export class User {
   @Column({ nullable: true })
   registrationLinkId: string;
 
-  @OneToMany(() => Promotion, (promotion) => promotion.teacher)
+  @ManyToMany(() => Promotion, (promo) => promo.students)
+  @JoinTable()
   promotions: Promotion[];
 
   @OneToMany(() => Group, (group) => group.leader)
   groupsLed: Group[];
 
-  @ManyToOne(() => Promotion, (promotion) => promotion.students)
-  promotion: Promotion;
-
   @OneToMany(() => Submission, (submission) => submission.student)
   submissions: Submission[];
+  sub: any;
 }

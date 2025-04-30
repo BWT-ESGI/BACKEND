@@ -7,6 +7,8 @@ import { UpdateGroupDto } from './dto/update-group.dto';
 import { Project } from '@/project/entities/project.entity';
 import { User } from '@/users/entities/user.entity';
 import { SaveGroupDto } from './dto/save-groups.dto';
+import { Defense } from '@/defense/entities/defense.entity';
+import { Month } from '@/defense/enums/month.enum';
 
 @Injectable()
 export class GroupService {
@@ -17,11 +19,13 @@ export class GroupService {
     private readonly projectRepository: Repository<Project>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Defense)
+    private readonly defenseRepository: Repository<Defense>,
   ) {}
 
   async findByProjectId(projectId: string): Promise<Group[]> {
     return this.groupRepository.find({
-      where: { project: { id: parseInt(projectId, 10) } },
+      where: { project: { id: projectId } },
       relations: ['members', 'project'],
     });
   }
@@ -35,54 +39,56 @@ export class GroupService {
     return await this.groupRepository.find();
   }
 
-  async findOne(id: number): Promise<Group> {
-    const group = await this.groupRepository.findOne({ where: { id: id.toString() } });
+  async findOne(id: string): Promise<Group> {
+    const group = await this.groupRepository.findOne({ where: { id: id } });
     if (!group) throw new NotFoundException('Group not found');
     return group;
   }
 
-  async update(id: number, updateGroupDto: UpdateGroupDto): Promise<Group> {
+  async update(id: string, updateGroupDto: UpdateGroupDto): Promise<Group> {
     await this.findOne(id);
     await this.groupRepository.update(id, updateGroupDto);
     return await this.findOne(id);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     await this.findOne(id);
     await this.groupRepository.delete(id);
   }
 
-  async saveGroupsForProject(projectId: number, groupDtos: SaveGroupDto[]): Promise<Group[]> {
-    const project = await this.projectRepository.findOneOrFail({ where: { id: projectId } });
+  async leaveGroup(idGroup: string, id: string): Promise<Group> {
+    const group = await this.groupRepository.findOne({
+      where: { id: idGroup },
+      relations: ['members'],
+    });
+    if (!group) throw new NotFoundException('Group not found');
+    const user = await this.userRepository.findOne({ where: { id: id } });
+    if (!user) throw new NotFoundException('User not found');
+    group.members = group.members.filter((member) => member.id !== user.id);
+    await this.groupRepository.save(group);
+    return group;
+  }
 
-    const savedGroups: Group[] = [];
+  async joinGroup(idGroup: string, id: string): Promise<Group> {
+    const group = await this.groupRepository.findOne({
+      where: { id: idGroup },
+      relations: ['members'],
+    });
+    if (!group) throw new NotFoundException('Group not found');
+    const user = await this.userRepository.findOne({ where: { id: id } });
+    if (!user) throw new NotFoundException('User not found');
+    group.members.push(user);
+    await this.groupRepository.save(group);
+    return group;
+  }
 
-    for (const dto of groupDtos) {
-      const users = await this.userRepository.findByIds(dto.memberIds);
-
-      let group: Group;
-
-      if (dto.id) {
-        // Update existing
-        group = await this.groupRepository.findOneOrFail({
-          where: { id: dto.id.toString() },
-          relations: ['members'],
-        });
-        group.name = dto.name;
-        group.members = users;
-      } else {
-        // Create new
-        group = this.groupRepository.create({
-          name: dto.name,
-          project,
-          members: users,
-        });
-      }
-
-      const saved = await this.groupRepository.save(group);
-      savedGroups.push(saved);
-    }
-
-    return savedGroups;
+  async findWithMembersAndDefenses(projectId: string): Promise<Group[]> {
+    return this.groupRepository
+      .createQueryBuilder('group')
+      .leftJoinAndSelect('group.members', 'member')
+      .leftJoinAndSelect('group.defense', 'defense')
+      .where('group.projectId = :projectId', { projectId })
+      .orderBy('defense.start', 'ASC')
+      .getMany();
   }
 }
