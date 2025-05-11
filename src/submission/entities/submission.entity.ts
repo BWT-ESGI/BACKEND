@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToOne,
@@ -24,15 +25,30 @@ export class Submission {
   @Column({ nullable: true })
   gitRepoUrl?: string;
 
+  @Column({ nullable: true })
+  archiveObjectName: string; // clé MinIO
+
   @Column({ default: false })
   isLate: boolean;
 
+  @Column({ type: 'float', default: 0 })
+  penaltyApplied: number;
+
+  @Column()
+  deliverableId: string;
+
   @ManyToOne(() => Deliverable)
   deliverable: Deliverable;
+
+  @Column()
+  groupId: string;
 
   @ManyToOne(() => Group, { nullable: true })
   group?: Group;
 
   @ManyToOne(() => User, { nullable: true })
   student?: User;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsNumber, IsDateString } from 'class-validator';
+import { IsString, IsBoolean, IsNumber, IsDateString, IsDate } from 'class-validator';
 
 export class CreateDeliverableDto {
   @IsString()
@@ -7,12 +7,18 @@ export class CreateDeliverableDto {
   @IsString()
   description: string;
 
-  @IsDateString()
-  deadline: string;
+  @IsDate()
+  deadline: Date;
 
   @IsBoolean()
   allowLateSubmission: boolean;
 
   @IsNumber()
   penaltyPerHourLate: number;
+
+  @IsString()
+  submissionType: 'archive' | 'git';
+
+  @IsNumber()
+  maxSize?: number; // En Mo
 }

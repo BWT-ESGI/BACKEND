@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Deliverable } from './entities/deliverable.entity';
@@ -13,7 +13,10 @@ export class DeliverableService {
   ) {}
 
   create(createDeliverableDto: CreateDeliverableDto): Promise<Deliverable> {
-    const deliverable = this.deliverableRepository.create(createDeliverableDto);
+    const deliverable = this.deliverableRepository.create({
+      ...createDeliverableDto,
+      deadline: new Date(createDeliverableDto.deadline),
+    });
     return this.deliverableRepository.save(deliverable);
   }
 
@@ -21,16 +24,23 @@ export class DeliverableService {
     return this.deliverableRepository.find();
   }
 
-  findOne(id: string): Promise<Deliverable> {
-    return this.deliverableRepository.findOne({ where: { id } });
+  async findOne(id: string): Promise<Deliverable> {
+    const entity = await this.deliverableRepository.findOne({ where: { id } });
+    if (!entity) throw new NotFoundException(`Deliverable ${id} introuvable`);
+    return entity;
   }
 
   async update(id: string, updateDeliverableDto: UpdateDeliverableDto): Promise<Deliverable> {
+    await this.findOne(id); // Vérifie si le deliverable existe
+    if (updateDeliverableDto.deadline) {
+      updateDeliverableDto.deadline = new Date(updateDeliverableDto.deadline);
+    }
     await this.deliverableRepository.update(id, updateDeliverableDto);
     return this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
+    await this.findOne(id); // Vérifie si le deliverable existe
     await this.deliverableRepository.delete(id);
   }
 }

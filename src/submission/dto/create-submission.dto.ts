@@ -14,7 +14,7 @@ export class CreateSubmissionDto {
 
   @IsOptional()
   @IsString()
-  fileUrl?: string;
+  archiveObjectName?: string; // clé MinIO
 
   @IsOptional()
   @IsString()

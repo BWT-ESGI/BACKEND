@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Project } from '@/project/entities/project.entity';
 import { ValidationRule } from './validation-rule.entity';
+import { Submission } from '@/submission/entities/submission.entity';
 
 @Entity()
 export class Deliverable {
@@ -40,4 +41,7 @@ export class Deliverable {
   
   @OneToMany(() => ValidationRule, rule => rule.deliverable, { cascade: true })
   validationRules: ValidationRule[];
+
+  @OneToMany(() => Submission, (submission) => submission.deliverable)
+  submissions: Submission[];
 }
