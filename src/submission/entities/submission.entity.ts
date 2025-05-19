@@ -51,4 +51,10 @@ export class Submission {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ nullable: true })
+  filename?: string;
+
+  @Column({ nullable: true, type: 'bigint' })
+  size?: number;
 }

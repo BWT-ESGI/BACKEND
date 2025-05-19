@@ -5,14 +5,16 @@ import { ValidationRule } from './entities/validation-rule.entity';
 import { Project } from '@/project/entities/project.entity';
 import { DeliverableService } from './deliverable.service';
 import { DeliverableController } from './deliverable.controller';
+import { MinioModule } from '../minio/minio.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Deliverable,
       ValidationRule,
-      Project
-    ])
+      Project,
+    ]),
+    MinioModule,
   ],
   providers: [DeliverableService],
   controllers: [DeliverableController],

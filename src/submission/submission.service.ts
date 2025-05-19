@@ -18,14 +18,16 @@ export class SubmissionService {
 
   async create(dto: CreateSubmissionDto, fileBuffer?: Buffer, fileName?: string, fileSize?: number): Promise<Submission> {
     const deliverable = await this.deliverableService.findOne(dto.deliverableId);
-    const submission = this.submissionRepository.create(dto);
-
-    submission.deliverable = deliverable;
-    submission.deliverableId = dto.deliverableId;
-    submission.groupId = dto.groupId;
-    submission.submittedAt = new Date();
-
-    // Late logic
+    // 1. Créer la soumission en base pour obtenir l'id
+    let submission = this.submissionRepository.create({
+      ...dto,
+      deliverable,
+      deliverableId: dto.deliverableId,
+      groupId: dto.groupId,
+      submittedAt: new Date(),
+      isLate: false,
+      penaltyApplied: 0,
+    });
     submission.isLate = submission.submittedAt > deliverable.deadline;
     if (submission.isLate && !deliverable.allowLateSubmission) {
       throw new Error('Soumission tardive non autorisée');
@@ -33,17 +35,22 @@ export class SubmissionService {
     submission.penaltyApplied = submission.isLate
       ? ((submission.submittedAt.getTime() - deliverable.deadline.getTime()) / 1000 / 3600) * deliverable.penaltyPerHourLate
       : 0;
+    submission = await this.submissionRepository.save(submission);
 
-    // Storage
+    // 2. Uploader le fichier avec l'id réel
     if (fileBuffer && fileName) {
       const objectName = `submissions/${submission.id}/${fileName}`;
-      await this.minioService.upload('archives', objectName, fileBuffer, fileSize);
+      await this.minioService.upload('bwt', objectName, fileBuffer, fileSize);
       submission.archiveObjectName = objectName;
+      submission.filename = fileName;
+      submission.size = fileSize;
+      await this.submissionRepository.save(submission);
     } else if (dto.gitRepoUrl) {
       submission.gitRepoUrl = dto.gitRepoUrl;
+      await this.submissionRepository.save(submission);
     }
 
-    return this.submissionRepository.save(submission);
+    return submission;
   }
 
   findAll(): Promise<Submission[]> {

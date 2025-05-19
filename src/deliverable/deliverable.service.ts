@@ -13,6 +13,7 @@ export class DeliverableService {
   ) {}
 
   create(createDeliverableDto: CreateDeliverableDto): Promise<Deliverable> {
+    // Correction : deadline est déjà une string ISO, il faut la convertir explicitement en Date
     const deliverable = this.deliverableRepository.create({
       ...createDeliverableDto,
       deadline: new Date(createDeliverableDto.deadline),
@@ -32,8 +33,9 @@ export class DeliverableService {
 
   async update(id: string, updateDeliverableDto: UpdateDeliverableDto): Promise<Deliverable> {
     await this.findOne(id); // Vérifie si le deliverable existe
+    // Correction : si deadline est présent, le convertir en Date
     if (updateDeliverableDto.deadline) {
-      updateDeliverableDto.deadline = new Date(updateDeliverableDto.deadline);
+      (updateDeliverableDto as any).deadline = new Date(updateDeliverableDto.deadline);
     }
     await this.deliverableRepository.update(id, updateDeliverableDto);
     return this.findOne(id);
@@ -43,4 +45,6 @@ export class DeliverableService {
     await this.findOne(id); // Vérifie si le deliverable existe
     await this.deliverableRepository.delete(id);
   }
+
+  // La gestion de l'upload de fichiers se fait via SubmissionService/Controller désormais
 }

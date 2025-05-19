@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsNumber, IsDateString, IsDate } from 'class-validator';
+import { IsString, IsBoolean, IsNumber, IsDateString } from 'class-validator';
 
 export class CreateDeliverableDto {
   @IsString()
@@ -7,8 +7,8 @@ export class CreateDeliverableDto {
   @IsString()
   description: string;
 
-  @IsDate()
-  deadline: Date;
+  @IsDateString()
+  deadline: string;
 
   @IsBoolean()
   allowLateSubmission: boolean;

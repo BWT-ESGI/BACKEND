@@ -56,4 +56,9 @@ export class MinioService {
       stream.on('error', reject);
     });
   }
+
+  // Ajout d'un getter public pour le nom du bucket
+  public getBucketName(): string {
+    return this.bucketName;
+  }
 }
