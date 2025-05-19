@@ -2,6 +2,7 @@ version: '3'
 services:
   db:
     image: postgres:14
+    container_name: bwt-postgres
     restart: always
     environment:
       POSTGRES_USER: ${DB_USERNAME}
@@ -11,28 +12,32 @@ services:
       - "${DB_PORT_EXTERNAL}:5432"
 
   redis:
+    container_name: bwt-redis
     image: redis:6-alpine
     restart: always
     ports:
       - "${REDIS_PORT_EXTERNAL}:6379"
 
   minio:
-    image: minio/minio:latest
-    command: server /data
+    image: minio/minio
+    container_name: bwt-minio
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
     ports:
-      - "${MINIO_PORT}:9000"
-      - "40761:40761" # MinIO Console
+      - "${MINIO_FIRST_PORT}:9000"
+      - "${MINIO_SECOND_PORT}:9001"
     volumes:
       - minio-data:/data
+      - ./minio-start.sh:/usr/local/bin/minio-start.sh
+    entrypoint: /bin/sh /usr/local/bin/minio-start.sh
 
   # app:
   #   build:
   #     context: .
   #     dockerfile: Dockerfile
-  #   container_name: nest-app
+  #   container_name: bwt-app
   #   restart: always
   #   ports:
   #     - "${APP_PORT}:3000"

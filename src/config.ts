@@ -14,13 +14,5 @@ export default registerAs('config', () => {
       password: process.env.DB_PASSWORD,
       user: process.env.DB_USERNAME,
     },
-
-    minio: {
-      host: process.env.MINIO_HOST,
-      port: parseInt(process.env.MINIO_PORT, 10) || 9000,
-      useSSL: process.env.MINIO_USE_SSL === 'true',
-      accessKey: process.env.MINIO_ACCESS_KEY,
-      secretKey: process.env.MINIO_SECRET_KEY,
-    },
   };
 });

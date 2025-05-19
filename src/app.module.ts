@@ -11,21 +11,21 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import { ReportModule } from './report/report.module';
 import { DeliverableModule } from './deliverable/deliverable.module';
 import { GroupModule } from './group/group.module';
+import config from '@/config';
+import { MinioModule } from './minio/minio.module';
 import { DefenseModule } from './defense/defense.module';
-import config from './config.ts';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(
-      {
-        load: [config],
-        isGlobal: true,
-        envFilePath: '.env',
-        validationOptions: {
-          abortEarly: true,
-        },
-      }
-    ),
+    ConfigModule.forRoot({
+      load: [config],
+      isGlobal: true,
+      envFilePath: '.env',
+      validationOptions: {
+        abortEarly: true,
+      },
+    }),
+    MinioModule,
     DefenseModule,
     GroupModule,
     DeliverableModule,

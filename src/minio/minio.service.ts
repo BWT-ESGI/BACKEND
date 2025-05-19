@@ -1,9 +1,29 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Client } from 'minio';
+import * as Minio from 'minio';
 
 @Injectable()
 export class MinioService {
-  constructor(@Inject('MINIO_CLIENT') private readonly client: Client) {}
+  private client: Minio.Client;
+  private readonly bucketName = process.env.MINIO_BUCKET_NAME || 'bwt';
+
+  constructor() {
+    const minioPort = process.env.MINIO_FIRST_PORT
+      ? parseInt(process.env.MINIO_FIRST_PORT, 10)
+      : 9000;
+    const minioEndpoint = process.env.MINIO_ENDPOINT || 'localhost';
+    const minioUseSSL = process.env.MINIO_USE_SSL === 'true';
+    const minioAccessKey = process.env.MINIO_ROOT_USER || 'default-access-key';
+    const minioSecretKey =
+      process.env.MINIO_ROOT_PASSWORD || 'default-secret-key';
+
+    this.client = new Minio.Client({
+      endPoint: minioEndpoint,
+      port: minioPort,
+      useSSL: minioUseSSL,
+      accessKey: minioAccessKey,
+      secretKey: minioSecretKey,
+    });
+  }
 
   async upload(
     bucket: string,
@@ -11,7 +31,6 @@ export class MinioService {
     buffer: Buffer,
     size: number,
   ): Promise<string> {
-    // Crée le bucket si nécessaire
     const exists = await this.client.bucketExists(bucket);
     if (!exists) {
       await this.client.makeBucket(bucket, '');
