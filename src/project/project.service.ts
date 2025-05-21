@@ -9,9 +9,15 @@ import { Report } from '@/report/entities/report.entity';
 import { User } from '@/users/entities/user.entity';
 import { Role } from '@/users/enums/role.enum';
 import { ProjectStatus } from './enums/project-status.enum';
+const Mailjet = require('node-mailjet');
 
 @Injectable()
 export class ProjectService {
+  private mailjetClient = Mailjet.apiConnect(
+    process.env.MAILJET_API_KEY,
+    process.env.MAILJET_API_SECRET,
+  );
+
   constructor(
     @InjectRepository(Promotion)
     private readonly promotionRepository: Repository<Promotion>,
@@ -59,6 +65,7 @@ export class ProjectService {
   async create(dto: CreateProjectDto): Promise<Project> {
     const promotion = await this.promotionRepository.findOne({
       where: { id: dto.promotionId },
+      relations: ['students'],
     });
 
     if (!promotion) {
@@ -146,13 +153,56 @@ export class ProjectService {
     id: string,
     updateDto: Partial<Project>,
   ): Promise<Project> {
-    await this.findOne(id);
+    const project = await this.findOne(id);
     await this.projectRepository.update(id, updateDto);
+    const updatedProject = await this.findOne(id);
+
+    // Envoi des e-mails aux étudiants (non-teachers)
+    if(project && project.promotion && (updatedProject.status == ProjectStatus.PUBLISHED) && (project.status == ProjectStatus.DRAFT || project.status == ProjectStatus.INACTIVE || project.status == ProjectStatus.ARCHIVED)) {
+      const promotion = await this.promotionRepository.findOne({
+        where: { id: project.promotion.id },
+        relations: ['students'],
+      });
+
+      const studentsToNotify = promotion.students.filter(
+        (user) => user.role !== Role.Teacher,
+      );
+
+      for (const student of studentsToNotify) {
+        if (student.email) {
+          await this.sendProjectNotificationEmail(
+            student.email,
+            student.firstName || 'Étudiant',
+            project.name,
+            project.promotion.name
+          );
+        }
+      }
+    }
     return await this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
     await this.findOne(id);
     await this.projectRepository.delete(id);
+  }
+
+   async sendProjectNotificationEmail(to: string, firstName: string, projectName: string, promotionName: string): Promise<void> {
+    await this.mailjetClient.post('send', { version: 'v3.1' }).request({
+      Messages: [
+        {
+          From: {
+            Email: 'bwt.esgi@gmail.com',
+            Name: 'EduProManager',
+          },
+          To: [{ Email: to, Name: firstName }],
+          Subject: `Nouveau projet : ${projectName}`,
+          HTMLPart: `<h3>Bonjour ${firstName},</h3>
+                    <p>Un nouveau projet <strong>${projectName}</strong> a été créé dans votre promotion ${promotionName}.</p>
+                    <p>Vous serez bientôt affecté à un groupe ou à en choisir un.</p>`,
+          TextPart: `Bonjour ${firstName},\n\nUn nouveau projet "${projectName}" a été créé dans votre promotion.`,
+        },
+      ],
+    });
   }
 }
