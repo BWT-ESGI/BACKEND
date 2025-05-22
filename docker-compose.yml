@@ -19,9 +19,7 @@ services:
       - "${REDIS_PORT_EXTERNAL}:6379"
 
   minio:
-    build:
-      context: .
-      dockerfile: Dockerfile.minio
+    image: minio/minio
     container_name: bwt-minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
