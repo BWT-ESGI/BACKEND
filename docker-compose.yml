@@ -29,8 +29,10 @@ services:
       - "${MINIO_FIRST_PORT}:9000"
       - "${MINIO_SECOND_PORT}:9001"
     volumes:
+      - type: bind
+        source: ./minio-start.sh
+        target: /usr/local/bin/minio-start.sh
       - minio-data:/data
-      - ./minio-start.sh:/usr/local/bin/minio-start.sh
     entrypoint: ["/bin/sh", "-c", "chmod +x /usr/local/bin/minio-start.sh && /usr/local/bin/minio-start.sh"]
 
   app:
