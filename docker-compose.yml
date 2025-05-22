@@ -31,7 +31,8 @@ services:
     volumes:
       - minio-data:/data
       - ./minio-start.sh:/usr/local/bin/minio-start.sh:ro
-    entrypoint: ["/bin/sh", "chmod", "+x", "/usr/local/bin/minio-start.sh", "&&", "/usr/local/bin/minio-start.sh"]
+    entrypoint: ["/bin/sh", "-c"]
+    command: "chmod +x /usr/local/bin/minio-start.sh && /usr/local/bin/minio-start.sh"
 
   app:
     build:
