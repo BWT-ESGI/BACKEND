@@ -1,0 +1,6 @@
+FROM minio/minio
+
+COPY minio-start.sh /usr/local/bin/minio-start.sh
+RUN chmod +x /usr/local/bin/minio-start.sh
+
+ENTRYPOINT ["/usr/local/bin/minio-start.sh"]
