@@ -33,35 +33,35 @@ services:
       - ./minio-start.sh:/usr/local/bin/minio-start.sh
     entrypoint: /bin/sh /usr/local/bin/minio-start.sh
 
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: bwt-app
-  #   restart: always
-  #   ports:
-  #     - "${APP_PORT}:3000"
-  #   depends_on:
-  #     - db
-  #     - redis
-  #     - minio
-  #   environment:
-  #     NODE_ENV: development
-  #     # Configuration DB
-  #     DB_HOST: db
-  #     DB_PORT: 5432
-  #     DB_USERNAME: ${DB_USERNAME}
-  #     DB_PASSWORD: ${DB_PASSWORD}
-  #     DB_NAME: ${DB_NAME}
-  #     # Configuration Redis
-  #     REDIS_HOST: redis
-  #     REDIS_PORT: 6379
-  #     # Configuration MinIO
-  #     MINIO_HOST: minio
-  #     MINIO_PORT: 9000
-  #     MINIO_USE_SSL: 'false'
-  #     MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-  #     MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bwt-app
+    restart: always
+    ports:
+      - "${APP_PORT}:3000"
+    depends_on:
+      - db
+      - redis
+      - minio
+    environment:
+      NODE_ENV: development
+      # Configuration DB
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      # Configuration Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # Configuration MinIO
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: 'false'
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
 
 volumes:
   minio-data:
