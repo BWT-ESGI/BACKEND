@@ -6,6 +6,11 @@ import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { UpdateSubmissionDto } from './dto/update-submission.dto';
 import { DeliverableService } from '@/deliverable/deliverable.service';
 import { MinioService } from '@/minio/minio.service';
+import { RuleService } from '@/rule/rule.service';
+import { RuleType } from '@/rule/entities/rule.entity';
+import { RuleResultService } from '@/rule-result/rule-result.service';
+import { COMMON_FILES, COMMON_ARCHITECTURES } from '@/rule/rule-suggestions';
+import * as zipUtils from './zip-utils';
 
 @Injectable()
 export class SubmissionService {
@@ -14,7 +19,56 @@ export class SubmissionService {
     private readonly submissionRepository: Repository<Submission>,
     private readonly deliverableService: DeliverableService,
     private readonly minioService: MinioService,
-  ) {}
+    private readonly ruleService: RuleService,
+    private readonly ruleResultService: RuleResultService,
+  ) { }
+
+  async checkRules(submission: Submission, fileBuffer: Buffer) {
+    const rules = await this.ruleService.findByDeliverable(submission.deliverableId);
+    for (const rule of rules) {
+      let passed = false;
+      let message = '';
+      try {
+        switch (rule.type) {
+          case RuleType.FILE_EXISTS: {
+            const file = rule.preset || rule.config.file;
+            passed = zipUtils.fileExistsInZip(fileBuffer, file);
+            message = passed ? `Fichier ${file} présent.` : `Fichier ${file} manquant.`;
+            break;
+          }
+          case RuleType.DIR_STRUCTURE: {
+            let structure = rule.config.structure;
+            if (rule.preset) {
+              const preset = COMMON_ARCHITECTURES.find(a => a.name === rule.preset);
+              structure = preset ? preset.structure : structure;
+            }
+            passed = zipUtils.dirStructureMatches(fileBuffer, structure);
+            message = passed ? `Structure conforme.` : `Structure non conforme.`;
+            break;
+          }
+          case RuleType.CONTENT_REGEX: {
+            const file = rule.config.file;
+            const matcher = rule.config.matcher;
+            passed = zipUtils.fileContentMatches(fileBuffer, file, matcher);
+            message = passed ? `Contenu conforme.` : `Contenu non conforme.`;
+            break;
+          }
+          default:
+            passed = true;
+            message = 'Règle non supportée.';
+        }
+      } catch (e) {
+        passed = false;
+        message = `Erreur lors de la vérification: ${e}`;
+      }
+      await this.ruleResultService.create({
+        submissionId: submission.id,
+        ruleId: rule.id,
+        passed,
+        message,
+      });
+    }
+  }
 
   async create(dto: CreateSubmissionDto, fileBuffer?: Buffer, fileName?: string, fileSize?: number): Promise<Submission> {
     const deliverable = await this.deliverableService.findOne(dto.deliverableId);
@@ -45,6 +99,8 @@ export class SubmissionService {
       submission.filename = fileName;
       submission.size = fileSize;
       await this.submissionRepository.save(submission);
+      // Vérification automatique des règles
+      await this.checkRules(submission, fileBuffer);
     } else if (dto.gitRepoUrl) {
       submission.gitRepoUrl = dto.gitRepoUrl;
       await this.submissionRepository.save(submission);

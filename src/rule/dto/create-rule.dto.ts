@@ -1,4 +1,4 @@
-import { IsUUID, IsEnum, IsObject } from 'class-validator';
+import { IsUUID, IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
 import { RuleType } from '../entities/rule.entity';
 
 export class CreateRuleDto {
@@ -10,4 +10,8 @@ export class CreateRuleDto {
 
   @IsObject()
   config: Record<string, any>;
+
+  @IsOptional()
+  @IsString()
+  preset?: string;
 }
