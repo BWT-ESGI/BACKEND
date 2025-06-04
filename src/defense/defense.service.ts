@@ -57,4 +57,13 @@ export class DefenseService {
       .orderBy('defense.start', 'ASC')
       .getMany();
   }
+
+  async findAllByProject(projectId: string): Promise<Defense[]> {
+    return this.defenseRepo
+      .createQueryBuilder('defense')
+      .innerJoinAndSelect('defense.group', 'grp')
+      .where('grp.projectId = :projectId', { projectId })
+      .orderBy('defense.start', 'ASC')
+      .getMany();
+  }
 }

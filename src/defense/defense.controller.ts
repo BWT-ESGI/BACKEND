@@ -63,4 +63,12 @@ export class DefenseController {
   findByActiveGroups(@Param('projectId') projectId: string) {
     return this.defenseService.findByActiveGroups(projectId);
   }
+
+  @Get('byProject/:projectId')
+  @ApiOperation({ summary: 'Get all defenses for a project' })
+  @ApiParam({ name: 'projectId', type: String })
+  @ApiResponse({ status: 200, description: 'List of defenses for the project.' })
+  findAllByProject(@Param('projectId') projectId: string) {
+    return this.defenseService.findAllByProject(projectId);
+  }
 }
