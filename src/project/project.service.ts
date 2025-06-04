@@ -34,20 +34,20 @@ export class ProjectService {
     const qb = this.projectRepository.createQueryBuilder('project');
 
     if (user.role === Role.Student) {
-      qb.innerJoin('project.promotion', 'promotion')
-      .innerJoin(
-        'promotion.students',
-        'promoStudent',
-        'promoStudent.id = :uid',
-        { uid: userId },
-      )
-      .leftJoinAndSelect('project.groups', 'group')
-      .leftJoinAndSelect('group.members', 'member')
-      .andWhere('project.status != :status', {
-        status: ProjectStatus.DRAFT,
-      })
+      qb.innerJoinAndSelect('project.promotion', 'promotion')
+        .innerJoin(
+          'promotion.students',
+          'promoStudent',
+          'promoStudent.id = :uid',
+          { uid: userId },
+        )
+        .leftJoinAndSelect('project.groups', 'group')
+        .leftJoinAndSelect('group.members', 'member')
+        .andWhere('project.status != :status', {
+          status: ProjectStatus.DRAFT,
+        });
     } else {
-      qb.innerJoin('project.promotion', 'promotion')
+      qb.innerJoinAndSelect('project.promotion', 'promotion')
         .innerJoin(
           'promotion.teacher',
           'teacher',
