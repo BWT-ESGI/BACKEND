@@ -6,11 +6,13 @@ import { SubmissionController } from './submission.controller';
 import { MinioService } from '@/minio/minio.service';
 import { DeliverableModule } from '@/deliverable/deliverable.module';
 import { MinioModule } from '@/minio/minio.module';
+import { RuleModule } from '@/rule/rule.module';
+import { RuleResultModule } from '@/rule-result/rule-result.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Submission]), DeliverableModule, MinioModule],
+  imports: [TypeOrmModule.forFeature([Submission]), DeliverableModule, MinioModule, RuleModule, RuleResultModule],
   providers: [SubmissionService, MinioService], // Faudra ajouter le SubmissionProcessor ici 
   controllers: [SubmissionController],
   exports: [SubmissionService],
 })
-export class SubmissionModule {}
+export class SubmissionModule { }

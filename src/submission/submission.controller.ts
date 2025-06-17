@@ -16,6 +16,7 @@ export class SubmissionController {
   ) { }
 
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Create a new submission' })
   @ApiResponse({ status: 201, description: 'Submission created successfully.' })
   async create(
