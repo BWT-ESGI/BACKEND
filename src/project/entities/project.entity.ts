@@ -53,6 +53,9 @@ export class Project {
   @Column({ nullable: true })
   endAt: Date;
 
+  @Column({ nullable: true })
+  deadlineGroupSelection: Date;
+
   @Column({
     type: 'enum',
     enum: ['draft', 'published', 'archived', 'active', 'inactive'],
