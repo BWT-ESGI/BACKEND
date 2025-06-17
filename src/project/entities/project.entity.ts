@@ -59,4 +59,13 @@ export class Project {
     default: 'draft',
   })
   status: ProjectStatus;
+
+  @Column({ nullable: true })
+  defenseCriteriaSetId?: string;
+
+  @Column({ nullable: true })
+  reportCriteriaSetId?: string;
+
+  @Column({ nullable: true })
+  deliverableCriteriaSetId?: string;
 }

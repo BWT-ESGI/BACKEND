@@ -13,7 +13,6 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
 
-  // Setting up swagger
   const options = new DocumentBuilder()
     .setTitle('nestjs-auth-starter')
     .setDescription('The nestjs-auth-starter API description')

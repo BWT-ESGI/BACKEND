@@ -14,6 +14,7 @@ import { GroupModule } from './group/group.module';
 import config from '@/config';
 import { MinioModule } from './minio/minio.module';
 import { DefenseModule } from './defense/defense.module';
+import { EvaluationModule } from './evaluation/evaluation.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { DefenseModule } from './defense/defense.module';
     UsersModule,
     ReportModule,
     IamModule,
+    EvaluationModule,
     TypeOrmModule.forRootAsync({
       inject: [config.KEY],
       useFactory: (configService: ConfigType<typeof config>) => {
