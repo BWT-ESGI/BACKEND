@@ -36,9 +36,12 @@ export class Deliverable {
   @Column({ nullable: true })
   maxSize?: number; // En Mo
   
-  @ManyToOne(() => Project, project => project.deliverables)
+  @ManyToOne(() => Project, project => project.deliverables, { nullable: false })
   project: Project;
-  
+
+  @Column({ type: 'uuid' })
+  projectId: string;
+
   @OneToMany(() => ValidationRule, rule => rule.deliverable, { cascade: true })
   validationRules: ValidationRule[];
 

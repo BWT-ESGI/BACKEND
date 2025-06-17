@@ -75,4 +75,12 @@ export class DeliverableController {
     const url = await this.minioService.getPresignedUrl(this.minioService.getBucketName(), objectName, expirySeconds);
     return { url };
   }
+
+  @Get('by-project/:projectId')
+  @ApiOperation({ summary: 'Get all deliverables for a given projectId' })
+  @ApiParam({ name: 'projectId', type: String })
+  @ApiResponse({ status: 200, description: 'List of deliverables for the project.' })
+  findAllByProject(@Param('projectId') projectId: string) {
+    return this.deliverableService.findAllByProjectId(projectId);
+  }
 }

@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsNumber, IsDateString } from 'class-validator';
+import { IsString, IsBoolean, IsNumber, IsDateString, ValidateIf } from 'class-validator';
 
 export class CreateDeliverableDto {
   @IsString()
@@ -19,6 +19,7 @@ export class CreateDeliverableDto {
   @IsString()
   submissionType: 'archive' | 'git';
 
+  @ValidateIf(o => o.submissionType === 'archive')
   @IsNumber()
   maxSize?: number; // En Mo
 }

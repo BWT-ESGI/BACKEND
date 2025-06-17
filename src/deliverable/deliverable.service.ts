@@ -10,7 +10,7 @@ export class DeliverableService {
   constructor(
     @InjectRepository(Deliverable)
     private readonly deliverableRepository: Repository<Deliverable>,
-  ) {}
+  ) { }
 
   create(createDeliverableDto: CreateDeliverableDto): Promise<Deliverable> {
     // Correction : deadline est déjà une string ISO, il faut la convertir explicitement en Date
@@ -44,6 +44,13 @@ export class DeliverableService {
   async remove(id: string): Promise<void> {
     await this.findOne(id); // Vérifie si le deliverable existe
     await this.deliverableRepository.delete(id);
+  }
+
+  async findAllByProjectId(projectId: string): Promise<Deliverable[]> {
+    return this.deliverableRepository.find({
+      where: { project: { id: projectId } },
+      relations: ['project'],
+    });
   }
 
   // La gestion de l'upload de fichiers se fait via SubmissionService/Controller désormais
