@@ -204,24 +204,26 @@ export class StatisticsService implements OnModuleInit {
     console.log('--- Fin du calcul des stats ---');
 
     return {
-      totalDeliverables: deliverables.length,
-      totalSubmissions: submissions.length,
-      lateSubmissions: lateSubmissions.length,
-      gradesCount,
-      averageGrade:
-        averageGrade !== null ? Math.round(averageGrade * 100) / 100 : null,
-      medianGrade:
-        medianGrade !== null ? Math.round(medianGrade * 100) / 100 : null,
-      minGrade,
-      maxGrade,
-      variance: variance !== null ? Math.round(variance * 100) / 100 : null,
-      stdDev: stdDev !== null ? Math.round(stdDev * 100) / 100 : null,
-      Q1: Q1 !== null ? Math.round(Q1 * 100) / 100 : null,
-      Q3: Q3 !== null ? Math.round(Q3 * 100) / 100 : null,
-      P90: P90 !== null ? Math.round(P90 * 100) / 100 : null,
-      passRate: passRate !== null ? Math.round(passRate * 100) / 100 : null,
-      groupGrades: groupStats,
-      typeAverages,
+      deliverables: {
+        total: deliverables.length,
+        totalSubmissions: submissions.length,
+        lateSubmissions: lateSubmissions.length,
+      },
+      grades: {
+        gradesCount,
+        average: averageGrade !== null ? Math.round(averageGrade * 100) / 100 : null,
+        median: medianGrade !== null ? Math.round(medianGrade * 100) / 100 : null,
+        min: minGrade,
+        max: maxGrade,
+        variance: variance !== null ? Math.round(variance * 100) / 100 : null,
+        stdDev: stdDev !== null ? Math.round(stdDev * 100) / 100 : null,
+        Q1: Q1 !== null ? Math.round(Q1 * 100) / 100 : null,
+        Q3: Q3 !== null ? Math.round(Q3 * 100) / 100 : null,
+        P90: P90 !== null ? Math.round(P90 * 100) / 100 : null,
+        passRate: passRate !== null ? Math.round(passRate * 100) / 100 : null,
+        groupGrades: groupStats,
+        typeAverages,
+      },
     };
   }
 }
