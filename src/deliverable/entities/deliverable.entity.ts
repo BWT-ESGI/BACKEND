@@ -47,4 +47,7 @@ export class Deliverable {
 
   @OneToMany(() => Submission, (submission) => submission.deliverable)
   submissions: Submission[];
+
+  @Column({ nullable: true, type: 'uuid' })
+  criteriaSetId?: string;
 }

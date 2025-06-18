@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { EvaluationGridService } from '../services/evaluation-grid.service';
 import { CreateEvaluationGridDto } from '../dto/create-evaluation-grid.dto';
 
@@ -12,7 +12,13 @@ export class EvaluationGridController {
   }
 
   @Get()
-  findOne(@Query('criteriaSetId') criteriaSetId: string, @Query('groupId') groupId: string) {
-    return this.evaluationGridService.findOne(criteriaSetId, groupId);
+  findOne(
+    @Query('criteriaSetId') criteriaSetId: string,
+    @Query('groupId') groupId: string,
+    @Query('deliverableId') deliverableId?: string,
+    @Query('defenseId') defenseId?: string,
+    @Query('reportId') reportId?: string,
+  ) {
+    return this.evaluationGridService.findOne(criteriaSetId, groupId, deliverableId, defenseId, reportId);
   }
 }

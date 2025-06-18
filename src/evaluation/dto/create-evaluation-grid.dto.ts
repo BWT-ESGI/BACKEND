@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsObject } from 'class-validator';
+import { IsNotEmpty, IsString, IsObject, IsOptional } from 'class-validator';
 
 export class CreateEvaluationGridDto {
   @IsString()
@@ -8,6 +8,18 @@ export class CreateEvaluationGridDto {
   @IsString()
   @IsNotEmpty()
   criteriaSetId: string;
+
+  @IsOptional()
+  @IsString()
+  deliverableId?: string;
+
+  @IsOptional()
+  @IsString()
+  defenseId?: string;
+
+  @IsOptional()
+  @IsString()
+  reportId?: string;
 
   @IsString()
   @IsNotEmpty()

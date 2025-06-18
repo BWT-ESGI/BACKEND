@@ -12,9 +12,13 @@ export class EvaluationGridService {
   ) {}
 
   async create(dto: CreateEvaluationGridDto) {
-    const existing = await this.evaluationGridRepository.findOne({ where: { criteriaSetId: dto.criteriaSetId, groupId: dto.groupId } });
+    // On priorise deliverableId, defenseId, reportId pour l'unicité
+    let where: any = { criteriaSetId: dto.criteriaSetId, groupId: dto.groupId };
+    if (dto.deliverableId) where.deliverableId = dto.deliverableId;
+    if (dto.defenseId) where.defenseId = dto.defenseId;
+    if (dto.reportId) where.reportId = dto.reportId;
+    const existing = await this.evaluationGridRepository.findOne({ where });
     if (existing) {
-      // Met à jour les champs modifiables
       existing.scores = dto.scores;
       existing.comments = dto.comments;
       existing.filledBy = dto.filledBy;
@@ -23,7 +27,11 @@ export class EvaluationGridService {
     return this.evaluationGridRepository.save(dto);
   }
 
-  findOne(criteriaSetId: string, groupId: string) {
-    return this.evaluationGridRepository.findOne({ where: { criteriaSetId, groupId } });
+  findOne(criteriaSetId: string, groupId: string, deliverableId?: string, defenseId?: string, reportId?: string) {
+    let where: any = { criteriaSetId, groupId };
+    if (deliverableId) where.deliverableId = deliverableId;
+    if (defenseId) where.defenseId = defenseId;
+    if (reportId) where.reportId = reportId;
+    return this.evaluationGridRepository.findOne({ where });
   }
 }

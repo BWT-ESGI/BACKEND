@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsNumber, IsDateString, ValidateIf } from 'class-validator';
+import { IsString, IsBoolean, IsNumber, IsDateString, ValidateIf, IsOptional } from 'class-validator';
 
 export class CreateDeliverableDto {
   @IsString()
@@ -22,4 +22,8 @@ export class CreateDeliverableDto {
   @ValidateIf(o => o.submissionType === 'archive')
   @IsNumber()
   maxSize?: number; // En Mo
+
+  @IsOptional()
+  @IsString()
+  criteriaSetId?: string;
 }

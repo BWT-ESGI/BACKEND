@@ -11,6 +11,15 @@ export class EvaluationGrid {
   @Column()
   criteriaSetId: string;
 
+  @Column({ nullable: true })
+  deliverableId?: string;
+
+  @Column({ nullable: true })
+  defenseId?: string;
+
+  @Column({ nullable: true })
+  reportId?: string;
+
   @Column()
   filledBy: string; // enseignant
 
