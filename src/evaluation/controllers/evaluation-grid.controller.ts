@@ -23,9 +23,4 @@ export class EvaluationGridController {
   ) {
     return this.evaluationGridService.findOne(criteriaSetId, groupId, deliverableId, defenseId, reportId);
   }
-
-  @Get('getAllGrad')
-  async getGradsForUser(@User() user: UserEntity) {
-    return this.evaluationGridService.getGradesDetailsForUser(user);
-  }
 }

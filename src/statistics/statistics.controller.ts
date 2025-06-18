@@ -9,4 +9,9 @@ export class StatisticsController {
   async getProjectStats(@Param('projectId') projectId: string) {
     return this.statisticsService.getProjectStats(projectId);
   }
+
+  @Get('user/:userId/grades')
+  async getUserGrades(@Param('userId') userId: string) {
+    return this.statisticsService.getUserGrades(userId);
+  }
 }

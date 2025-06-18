@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Deliverable } from '../deliverable/entities/deliverable.entity';
 import { Submission } from '../submission/entities/submission.entity';
-import { OverallGrade } from '../evaluation/entities/overall-grade.entity';
 import { Group } from '../group/entities/group.entity';
 import { EvaluationGrid } from '../evaluation/entities/evaluation-grid.entity';
 import { CriteriaSet } from '../evaluation/entities/criteria-set.entity';
@@ -19,8 +18,6 @@ export class StatisticsService implements OnModuleInit {
     private readonly deliverableRepository: Repository<Deliverable>,
     @InjectRepository(Submission)
     private readonly submissionRepository: Repository<Submission>,
-    @InjectRepository(OverallGrade)
-    private readonly overallGradeRepository: Repository<OverallGrade>,
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
     @InjectRepository(EvaluationGrid)
@@ -225,4 +222,64 @@ export class StatisticsService implements OnModuleInit {
       },
     };
   }
+
+  /**
+   * Retourne les notes détaillées et globales d'un utilisateur, triées par projet.
+   * @param userId string
+   */
+  async getUserGrades(userId: string) {
+    // 1. Trouver tous les groupes où l'utilisateur est membre
+    const groups = await this.groupRepository
+      .createQueryBuilder('group')
+      .leftJoinAndSelect('group.project', 'project')
+      .leftJoinAndSelect('group.members', 'member')
+      .where('member.id = :userId', { userId })
+      .getMany();
+    // 2. Grouper par projet
+    const projectsMap: Record<string, { projectId: string; projectName: string; grades: any[] }> = {};
+    for (const group of groups) {
+      const project = group.project;
+      if (!project) continue;
+      if (!projectsMap[project.id]) {
+        projectsMap[project.id] = { projectId: project.id, projectName: project.name, grades: [] };
+      }
+      // 3. Récupérer toutes les grilles d'évaluation de ce groupe pour ce projet
+      const grids = await this.evaluationGridRepository.find({
+        where: { projectId: project.id, groupId: group.id },
+      });
+      for (const grid of grids) {
+        // 4. Récupérer le criteriaSet et les critères
+        const criteriaSet = await this.criteriaSetRepository.findOne({ where: { id: grid.criteriaSetId } });
+        if (!criteriaSet) continue;
+        const criterias = await this.criteriaRepository.find({ where: { criteriaSetId: criteriaSet.id } });
+        // 5. Calculer la note globale de la grille
+        let total = 0, max = 0;
+        const details = criterias.map(crit => {
+          const score = grid.scores[crit.id] ?? 0;
+          const note = crit.maxScore > 0 ? (score / crit.maxScore) * crit.weight : 0;
+          total += note;
+          max += crit.weight;
+          return {
+            criteriaId: crit.id,
+            label: crit.label,
+            score,
+            maxScore: crit.maxScore,
+            weight: crit.weight,
+            note: crit.maxScore > 0 ? Math.round(note * 20 * 100) / 100 : null,
+            comment: grid.comments[crit.id] || null,
+          };
+        });
+        const global = max > 0 ? Math.round((total * 20 / max) * 100) / 100 : null;
+        projectsMap[project.id].grades.push({
+          gridId: grid.id,
+          criteriaSet: { id: criteriaSet.id, title: criteriaSet.title, type: criteriaSet.type },
+          details,
+          global,
+        });
+      }
+    }
+    // 6. Retourner un tableau trié par projet
+    return Object.values(projectsMap);
+  }
+
 }
