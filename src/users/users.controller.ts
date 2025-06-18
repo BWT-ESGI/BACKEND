@@ -87,7 +87,7 @@ export class UsersController {
     return this.usersService.remove(id);
   }
 
-  @Get('/:id/check-registration')
+  @Get('/check-registration/:id')
   @Auth(AuthType.None)
   @ApiOperation({ summary: 'Check user registration' })
   @ApiParam({ name: 'id', type: String })

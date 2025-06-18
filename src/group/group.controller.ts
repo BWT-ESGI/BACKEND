@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
@@ -6,6 +6,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { Group } from './entities/group.entity';
 import { SaveGroupDto } from './dto/save-groups.dto';
 import { SaveGroupService } from './saveGroup.service';
+import { DeadlineNotExpiredGuard } from './guard/DeadlineNotExpiredGuard';
 
 @ApiTags('Groups')
 @Controller('groups')
@@ -37,6 +38,7 @@ export class GroupController {
     return this.groupService.findOne(id);
   }
 
+  @UseGuards(DeadlineNotExpiredGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a group by ID' })
   @ApiParam({ name: 'id', type: String })
@@ -45,6 +47,7 @@ export class GroupController {
     return this.groupService.update(id, updateGroupDto);
   }
 
+  @UseGuards(DeadlineNotExpiredGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a group by ID' })
   @ApiParam({ name: 'id', type: String })
@@ -53,6 +56,7 @@ export class GroupController {
     return this.groupService.remove(id);
   }
 
+  @UseGuards(DeadlineNotExpiredGuard)
   @Delete(':idGroup/students/:id/leave')
   @ApiOperation({ summary: 'Remove a student from a group' })
   @ApiParam({ name: 'idGroup', type: String })
@@ -65,6 +69,7 @@ export class GroupController {
     return this.groupService.leaveGroup(idGroup, id);
   }
 
+  @UseGuards(DeadlineNotExpiredGuard)
   @Post(':idGroup/students/:id/join')
   async joinGroup(
     @Param('idGroup') idGroup: string,
@@ -78,6 +83,7 @@ export class GroupController {
     return this.groupService.findByProjectId(projectId);
   }
 
+  @UseGuards(DeadlineNotExpiredGuard)
   @Post('save-for-project/:projectId')
   async saveForProject(
     @Param('projectId') projectId: string,
