@@ -34,14 +34,11 @@ export class StatisticsService implements OnModuleInit {
   async onModuleInit() {}
 
   async getProjectStats(projectId: string) {
-    console.log('--- Calcul des statistiques pour le projet ---');
-    // Récupération des livrables
     const deliverables = await this.deliverableRepository.find({
       where: { projectId },
     });
     const deliverableIds = deliverables.map((d) => d.id);
 
-    // Récupération des soumissions
     const submissions = deliverableIds.length
       ? await this.submissionRepository.find({
           where: deliverableIds.map((id) => ({ deliverableId: id })),
@@ -49,11 +46,13 @@ export class StatisticsService implements OnModuleInit {
       : [];
     const lateSubmissions = submissions.filter((s) => s.isLate);
 
-    // Récupération des groupes
-    const groups = await this.groupRepository.find({
+    const groups = (
+      await this.groupRepository.find({
       where: { project: { id: projectId } },
-      relations: ['project'],
-    });
+      relations: ['project', 'members'],
+      })
+    ).filter((group) => Array.isArray(group.members) && group.members.length > 0);
+
     const groupStats = [] as Array<{
       groupId: string;
       groupName: string;
