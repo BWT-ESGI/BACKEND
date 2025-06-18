@@ -5,7 +5,6 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Project } from '@/project/entities/project.entity';
 import { Group } from '@/group/entities/group.entity';
 
 @Entity()

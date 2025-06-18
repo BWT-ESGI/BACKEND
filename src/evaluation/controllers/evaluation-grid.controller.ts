@@ -1,6 +1,8 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { EvaluationGridService } from '../services/evaluation-grid.service';
 import { CreateEvaluationGridDto } from '../dto/create-evaluation-grid.dto';
+import { User as UserEntity } from '@/users/entities/user.entity';
+import { User } from '@/common/decorators/user.decorator';
 
 @Controller('evaluation-grids')
 export class EvaluationGridController {
@@ -20,5 +22,10 @@ export class EvaluationGridController {
     @Query('reportId') reportId?: string,
   ) {
     return this.evaluationGridService.findOne(criteriaSetId, groupId, deliverableId, defenseId, reportId);
+  }
+
+  @Get('getAllGrad')
+  async getGradsForUser(@User() user: UserEntity) {
+    return this.evaluationGridService.getGradesDetailsForUser(user);
   }
 }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CriteriaSet } from './entities/criteria-set.entity';
 import { Criteria } from './entities/criteria.entity';
@@ -12,9 +12,14 @@ import { CriteriaSetController } from './controllers/criteria-set.controller';
 import { CriteriaController } from './controllers/criteria.controller';
 import { EvaluationGridController } from './controllers/evaluation-grid.controller';
 import { OverallGradeController } from './controllers/overall-grade.controller';
+import { ProjectModule } from '@/project/project.module';
+import { Project } from '@/project/entities/project.entity';
+import { User } from '@/users/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CriteriaSet, Criteria, EvaluationGrid, OverallGrade])],
+  imports: [TypeOrmModule.forFeature([CriteriaSet, Criteria, EvaluationGrid, OverallGrade, Project, User]),
+    forwardRef(() => ProjectModule),
+],
   providers: [CriteriaSetService, CriteriaService, EvaluationGridService, OverallGradeService],
   controllers: [CriteriaSetController, CriteriaController, EvaluationGridController, OverallGradeController],
 })
