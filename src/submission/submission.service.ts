@@ -24,53 +24,66 @@ export class SubmissionService {
   ) { }
 
   async checkRules(submission: Submission, fileBuffer: Buffer) {
-    const rules = await this.ruleService.findByDeliverable(submission.deliverableId);
-    for (const rule of rules) {
-      let passed = false;
-      let message = '';
-      try {
-        switch (rule.type) {
-          case RuleType.FILE_EXISTS: {
-            const file = rule.preset || rule.config.file;
-            passed = zipUtils.fileExistsInZip(fileBuffer, file);
-            message = passed ? `Fichier ${file} présent.` : `Fichier ${file} manquant.`;
-            break;
-          }
-          case RuleType.DIR_STRUCTURE: {
-            let structure = rule.config.structure;
-            if (rule.preset) {
-              const preset = COMMON_ARCHITECTURES.find(a => a.name === rule.preset);
-              structure = preset ? preset.structure : structure;
-            }
-            passed = zipUtils.dirStructureMatches(fileBuffer, structure);
-            message = passed ? `Structure conforme.` : `Structure non conforme.`;
-            break;
-          }
-          case RuleType.CONTENT_REGEX: {
-            const file = rule.config.file;
-            const matcher = rule.config.matcher;
-            passed = zipUtils.fileContentMatches(fileBuffer, file, matcher);
-            message = passed ? `Contenu conforme.` : `Contenu non conforme.`;
-            break;
-          }
-          default:
-            passed = true;
-            message = 'Règle non supportée.';
-        }
-      } catch (e) {
-        passed = false;
-        message = `Erreur lors de la vérification: ${e}`;
+    try {
+      const rules = await this.ruleService.findByDeliverable(submission.deliverableId);
+      if (!rules || rules.length === 0) {
+        console.warn(`Aucune règle trouvée pour le livrable ${submission.deliverableId}`);
       }
-      await this.ruleResultService.create({
-        submissionId: submission.id,
-        ruleId: rule.id,
-        passed,
-        message,
-      });
+      for (const rule of rules) {
+        let passed = false;
+        let message = '';
+        try {
+          switch (rule.type) {
+            case RuleType.FILE_EXISTS: {
+              const file = rule.preset || rule.config.file;
+              passed = zipUtils.fileExistsInZip(fileBuffer, file);
+              message = passed ? `Fichier ${file} présent.` : `Fichier ${file} manquant.`;
+              break;
+            }
+            case RuleType.DIR_STRUCTURE: {
+              let structure = rule.config.structure;
+              if (rule.preset) {
+                const preset = COMMON_ARCHITECTURES.find(a => a.name === rule.preset);
+                structure = preset ? preset.structure : structure;
+              }
+              passed = zipUtils.dirStructureMatches(fileBuffer, structure);
+              message = passed ? `Structure conforme.` : `Structure non conforme.`;
+              break;
+            }
+            case RuleType.CONTENT_REGEX: {
+              const file = rule.config.file;
+              const matcher = rule.config.matcher;
+              passed = zipUtils.fileContentMatches(fileBuffer, file, matcher);
+              message = passed ? `Contenu conforme.` : `Contenu non conforme.`;
+              break;
+            }
+            default:
+              passed = true;
+              message = 'Règle non supportée.';
+          }
+        } catch (e) {
+          passed = false;
+          message = `Erreur lors de la vérification: ${e}`;
+          console.error(`Erreur lors de la vérification de la règle ${rule.id} pour la soumission ${submission.id}:`, e);
+        }
+        try {
+          await this.ruleResultService.create({
+            submissionId: submission.id,
+            ruleId: rule.id,
+            passed,
+            message,
+          });
+        } catch (err) {
+          console.error(`Erreur lors de la création du RuleResult pour la règle ${rule.id} et la soumission ${submission.id}:`, err);
+        }
+      }
+    } catch (err) {
+      console.error('Erreur globale dans checkRules:', err);
     }
   }
 
   async create(dto: CreateSubmissionDto, fileBuffer?: Buffer, fileName?: string, fileSize?: number): Promise<Submission> {
+    console.log('Début création soumission', { dto, hasFile: !!fileBuffer, fileName });
     const deliverable = await this.deliverableService.findOne(dto.deliverableId);
     // 1. Créer la soumission en base pour obtenir l'id
     let submission = this.submissionRepository.create({
@@ -100,10 +113,16 @@ export class SubmissionService {
       submission.size = fileSize;
       await this.submissionRepository.save(submission);
       // Vérification automatique des règles
+      console.log('Déclenchement checkRules (archive)', { submissionId: submission.id });
       await this.checkRules(submission, fileBuffer);
     } else if (dto.gitRepoUrl) {
       submission.gitRepoUrl = dto.gitRepoUrl;
       await this.submissionRepository.save(submission);
+      // Générer les RuleResults même pour les livrables git (buffer vide)
+      console.log('Déclenchement checkRules (git)', { submissionId: submission.id });
+      await this.checkRules(submission, Buffer.alloc(0));
+    } else {
+      console.warn('Aucun fichier ni repo git fourni pour la soumission', { submissionId: submission.id });
     }
 
     return submission;

@@ -18,6 +18,7 @@ export class RuleService {
   }
 
   findByDeliverable(deliverableId: string): Promise<Rule[]> {
+    console.log('Recherche des règles pour le livrable:', deliverableId);
     return this.ruleRepo.find({ where: { deliverableId } });
   }
 

@@ -23,12 +23,21 @@ export class SubmissionController {
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: CreateSubmissionDto,
   ) {
-    return this.submissionService.create(
-      dto,
-      file?.buffer,
-      file?.originalname,
-      file?.size,
-    );
+    try {
+      const result = await this.submissionService.create(
+        dto,
+        file?.buffer,
+        file?.originalname,
+        file?.size,
+      );
+      return { message: 'Soumission créée', submission: result };
+    } catch (err) {
+      console.error('Erreur lors de la création de la soumission:', err);
+      return {
+        error: 'Erreur lors de la création de la soumission',
+        details: err?.message || err,
+      };
+    }
   }
 
   @Get()
@@ -42,8 +51,20 @@ export class SubmissionController {
   @ApiOperation({ summary: 'Get a submission by ID' })
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 200, description: 'Submission found.' })
-  findOne(@Param('id') id: string) {
-    return this.submissionService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    try {
+      const submission = await this.submissionService.findOne(id);
+      if (!submission) {
+        return { message: `Aucune soumission trouvée pour l'id ${id}` };
+      }
+      return { submission };
+    } catch (err) {
+      console.error(`Erreur lors de la récupération de la soumission ${id}:`, err);
+      return {
+        error: 'Erreur lors de la récupération de la soumission',
+        details: err?.message || err,
+      };
+    }
   }
 
   @Get('deliverable/:id')
