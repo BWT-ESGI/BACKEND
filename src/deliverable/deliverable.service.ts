@@ -53,5 +53,4 @@ export class DeliverableService {
     });
   }
 
-  // La gestion de l'upload de fichiers se fait via SubmissionService/Controller désormais
 }

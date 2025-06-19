@@ -41,35 +41,26 @@ export class StatisticsService implements OnModuleInit {
           where: deliverableIds.map((id) => ({ deliverableId: id })),
         })
       : [];
+
     const lateSubmissions = submissions.filter((s) => s.isLate);
 
     const groups = (
       await this.groupRepository.find({
-      where: { project: { id: projectId } },
-      relations: ['project', 'members'],
+        where: { project: { id: projectId } },
+        relations: ['project', 'members'],
       })
-    ).filter((group) => Array.isArray(group.members) && group.members.length > 0);
+    ).filter(
+      (group) => Array.isArray(group.members) && group.members.length > 0,
+    );
 
-    const groupStats = [] as Array<{
-      groupId: string;
-      groupName: string;
-      defenseGrade: number | null;
-      deliverableGrade: number | null;
-      reportGrade: number | null;
-      globalGrade: number | null;
-    }>;
+    const groupStats = [];
 
     for (const group of groups) {
-      console.log(`\n--- Groupe ${group.name} (${group.id}) ---`);
       const grids = await this.evaluationGridRepository.find({
         where: { projectId, groupId: group.id },
       });
 
-      // Initialisation des totaux par type
-      const typeTotals: Record<
-        string,
-        { total: number; max: number; weight: number }
-      > = {
+      const typeTotals = {
         defense: { total: 0, max: 0, weight: 0 },
         deliverable: { total: 0, max: 0, weight: 0 },
         report: { total: 0, max: 0, weight: 0 },
@@ -84,6 +75,7 @@ export class StatisticsService implements OnModuleInit {
         const criteria = await this.criteriaRepository.find({
           where: { criteriaSetId: grid.criteriaSetId },
         });
+
         let gridTotal = 0;
         let gridMax = 0;
 
@@ -102,7 +94,6 @@ export class StatisticsService implements OnModuleInit {
         }
       }
 
-      // Calcul des notes ramenées sur 20
       const calcGrade = (t: { total: number; max: number }) =>
         t.max > 0 ? (t.total * 20) / t.max : null;
 
@@ -110,7 +101,6 @@ export class StatisticsService implements OnModuleInit {
       const deliverableGrade = calcGrade(typeTotals.deliverable);
       const reportGrade = calcGrade(typeTotals.report);
 
-      // Note globale pondérée
       const totalWeight = Object.values(typeTotals).reduce(
         (acc, t) => acc + t.weight,
         0,
@@ -142,7 +132,6 @@ export class StatisticsService implements OnModuleInit {
       });
     }
 
-    // Calcul des stats globales
     const globalGrades = groupStats
       .map((g) => g.globalGrade)
       .filter((g): g is number => typeof g === 'number');
@@ -151,7 +140,6 @@ export class StatisticsService implements OnModuleInit {
     const averageGrade = gradesCount
       ? globalGrades.reduce((a, b) => a + b, 0) / gradesCount
       : null;
-
     const sorted = [...globalGrades].sort((a, b) => a - b);
     const medianGrade = gradesCount
       ? sorted.length % 2 === 1
@@ -160,8 +148,6 @@ export class StatisticsService implements OnModuleInit {
       : null;
     const minGrade = gradesCount ? Math.min(...globalGrades) : null;
     const maxGrade = gradesCount ? Math.max(...globalGrades) : null;
-
-    // Variance & écart-type
     const variance = gradesCount
       ? globalGrades.reduce(
           (sum, g) => sum + Math.pow(g - averageGrade!, 2),
@@ -170,7 +156,6 @@ export class StatisticsService implements OnModuleInit {
       : null;
     const stdDev = variance !== null ? Math.sqrt(variance) : null;
 
-    // Quartiles et percentiles
     const percentile = (p: number) => {
       if (!gradesCount) return null;
       const idx = (gradesCount - 1) * p;
@@ -180,24 +165,36 @@ export class StatisticsService implements OnModuleInit {
         ? sorted[lo]
         : sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
     };
+
     const Q1 = percentile(0.25);
     const Q3 = percentile(0.75);
     const P90 = percentile(0.9);
-
-    // Taux de réussite (>=10/20)
-    const passedCount = gradesCount
-      ? globalGrades.filter((g) => g >= 10).length
-      : 0;
+    const passedCount = globalGrades.filter((g) => g >= 10).length;
     const passRate = gradesCount ? (passedCount / gradesCount) * 100 : null;
 
-    // Calcul des scores moyens par type de note (défense, livrable, rapport)
-    const typeAverages: { defense?: number; deliverable?: number; report?: number } = {};
-    ["defense", "deliverable", "report"].forEach(type => {
-      const values = groupStats.map(g => g[`${type}Grade` as keyof typeof g]).filter((v): v is number => typeof v === 'number');
-      typeAverages[type as keyof typeof typeAverages] = values.length ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100 : undefined;
-    });
+    const typeAverages = ['defense', 'deliverable', 'report'].reduce(
+      (acc, type) => {
+        const values = groupStats
+          .map((g) => g[`${type}Grade` as keyof typeof g])
+          .filter((v): v is number => typeof v === 'number');
+        acc[type] = values.length
+          ? Math.round(
+              (values.reduce((a, b) => a + b, 0) / values.length) * 100,
+            ) / 100
+          : undefined;
+        return acc;
+      },
+      {} as Record<string, number | undefined>,
+    );
 
-    console.log('--- Fin du calcul des stats ---');
+    const gradeDistribution = (() => {
+      const bins = new Array(11).fill(0);
+      for (const grade of globalGrades) {
+        const index = Math.min(Math.floor(grade / 2), 10);
+        bins[index]++;
+      }
+      return bins;
+    })();
 
     return {
       deliverables: {
@@ -207,8 +204,10 @@ export class StatisticsService implements OnModuleInit {
       },
       grades: {
         gradesCount,
-        average: averageGrade !== null ? Math.round(averageGrade * 100) / 100 : null,
-        median: medianGrade !== null ? Math.round(medianGrade * 100) / 100 : null,
+        average:
+          averageGrade !== null ? Math.round(averageGrade * 100) / 100 : null,
+        median:
+          medianGrade !== null ? Math.round(medianGrade * 100) / 100 : null,
         min: minGrade,
         max: maxGrade,
         variance: variance !== null ? Math.round(variance * 100) / 100 : null,
@@ -220,6 +219,84 @@ export class StatisticsService implements OnModuleInit {
         groupGrades: groupStats,
         typeAverages,
       },
+      submissionStats: {
+        total: submissions.length,
+        lateCount: lateSubmissions.length,
+        lateRate: submissions.length
+          ? Math.round((lateSubmissions.length / submissions.length) * 10000) /
+            100
+          : 0,
+        averagePenalty: submissions.length
+          ? Math.round(
+              (submissions.reduce((a, b) => a + b.penaltyApplied, 0) /
+                submissions.length) *
+                100,
+            ) / 100
+          : null,
+        averageFileSize: submissions.length
+          ? Math.round(
+              (submissions.reduce((a, b) => a + (b.size || 0), 0) /
+                submissions.length /
+                1024 /
+                1024) *
+                100,
+            ) / 100
+          : null,
+        submissionTypeCount: {
+          archive: submissions.filter((s) => !!s.archiveObjectName).length,
+          fileUrl: submissions.filter((s) => !!s.fileUrl).length,
+          gitRepo: submissions.filter((s) => !!s.gitRepoUrl).length,
+        },
+      },
+      submissionTiming: {
+        averageSubmissionDelayHours: submissions.length
+          ? Math.round(
+              (submissions
+                .map((s) => {
+                  const deliverable = deliverables.find(
+                    (d) => d.id === s.deliverableId,
+                  );
+                  if (!deliverable) return 0;
+                  const deadline = new Date(deliverable.deadline).getTime();
+                  const submitted = new Date(s.submittedAt).getTime();
+                  return (submitted - deadline) / (1000 * 60 * 60);
+                })
+                .reduce((a, b) => a + b, 0) /
+                submissions.length) *
+                100,
+            ) / 100
+          : null,
+        submissionsJustBeforeDeadline: submissions.filter((s) => {
+          const deliverable = deliverables.find(
+            (d) => d.id === s.deliverableId,
+          );
+          if (!deliverable) return false;
+          const deadline = new Date(deliverable.deadline).getTime();
+          const submitted = new Date(s.submittedAt).getTime();
+          const diffMinutes = (deadline - submitted) / (1000 * 60);
+          return diffMinutes > 0 && diffMinutes <= 30;
+        }).length,
+      },
+      deliverableBreakdown: deliverables.map((deliv) => {
+        const related = submissions.filter((s) => s.deliverableId === deliv.id);
+        const late = related.filter((s) => s.isLate).length;
+        return {
+          id: deliv.id,
+          name: deliv.name,
+          deadline: deliv.deadline,
+          submissionCount: related.length,
+          lateCount: late,
+          lateRate: related.length
+            ? Math.round((late / related.length) * 10000) / 100
+            : 0,
+        };
+      }),
+      groups: {
+        total: groups.length,
+        withGrades: groupStats.filter((g) => typeof g.globalGrade === 'number')
+          .length,
+      },
+      gradeDistribution,
     };
   }
 
@@ -236,12 +313,19 @@ export class StatisticsService implements OnModuleInit {
       .where('member.id = :userId', { userId })
       .getMany();
     // 2. Grouper par projet
-    const projectsMap: Record<string, { projectId: string; projectName: string; grades: any[] }> = {};
+    const projectsMap: Record<
+      string,
+      { projectId: string; projectName: string; grades: any[] }
+    > = {};
     for (const group of groups) {
       const project = group.project;
       if (!project) continue;
       if (!projectsMap[project.id]) {
-        projectsMap[project.id] = { projectId: project.id, projectName: project.name, grades: [] };
+        projectsMap[project.id] = {
+          projectId: project.id,
+          projectName: project.name,
+          grades: [],
+        };
       }
       // 3. Récupérer toutes les grilles d'évaluation de ce groupe pour ce projet
       const grids = await this.evaluationGridRepository.find({
@@ -249,14 +333,20 @@ export class StatisticsService implements OnModuleInit {
       });
       for (const grid of grids) {
         // 4. Récupérer le criteriaSet et les critères
-        const criteriaSet = await this.criteriaSetRepository.findOne({ where: { id: grid.criteriaSetId } });
+        const criteriaSet = await this.criteriaSetRepository.findOne({
+          where: { id: grid.criteriaSetId },
+        });
         if (!criteriaSet) continue;
-        const criterias = await this.criteriaRepository.find({ where: { criteriaSetId: criteriaSet.id } });
+        const criterias = await this.criteriaRepository.find({
+          where: { criteriaSetId: criteriaSet.id },
+        });
         // 5. Calculer la note globale de la grille
-        let total = 0, max = 0;
-        const details = criterias.map(crit => {
+        let total = 0,
+          max = 0;
+        const details = criterias.map((crit) => {
           const score = grid.scores[crit.id] ?? 0;
-          const note = crit.maxScore > 0 ? (score / crit.maxScore) * crit.weight : 0;
+          const note =
+            crit.maxScore > 0 ? (score / crit.maxScore) * crit.weight : 0;
           total += note;
           max += crit.weight;
           return {
@@ -269,10 +359,15 @@ export class StatisticsService implements OnModuleInit {
             comment: grid.comments[crit.id] || null,
           };
         });
-        const global = max > 0 ? Math.round((total * 20 / max) * 100) / 100 : null;
+        const global =
+          max > 0 ? Math.round(((total * 20) / max) * 100) / 100 : null;
         projectsMap[project.id].grades.push({
           gridId: grid.id,
-          criteriaSet: { id: criteriaSet.id, title: criteriaSet.title, type: criteriaSet.type },
+          criteriaSet: {
+            id: criteriaSet.id,
+            title: criteriaSet.title,
+            type: criteriaSet.type,
+          },
           details,
           global,
         });
@@ -281,5 +376,4 @@ export class StatisticsService implements OnModuleInit {
     // 6. Retourner un tableau trié par projet
     return Object.values(projectsMap);
   }
-
 }
