@@ -3,20 +3,22 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
-  JoinColumn
+  JoinColumn,
+  OneToMany
 } from 'typeorm';
 
 import { Group } from '@/group/entities/group.entity';
+import { Section } from './section.entity';
 
 @Entity()
 export class Report {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('text')
-  content: string; // Markdown ou HTML
-
   @OneToOne(() => Group, (group) => group.report)
   @JoinColumn()
   group: Group;
+
+  @OneToMany(() => Section, (section) => section.report, { cascade: true, eager: true })
+  sections: Section[];
 }

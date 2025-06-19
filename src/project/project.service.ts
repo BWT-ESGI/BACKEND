@@ -94,7 +94,6 @@ export class ProjectService {
 
     const reports = savedGroups.map((group) =>
       this.reportRepository.create({
-        content: '',
         group,
       }),
     );
