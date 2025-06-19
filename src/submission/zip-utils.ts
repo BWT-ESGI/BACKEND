@@ -1,4 +1,4 @@
-import AdmZip from 'adm-zip';
+const AdmZip = require('adm-zip');
 import * as path from 'path';
 
 export function listZipEntries(buffer: Buffer): string[] {
@@ -6,9 +6,11 @@ export function listZipEntries(buffer: Buffer): string[] {
     return zip.getEntries().map(e => e.entryName);
 }
 
-export function fileExistsInZip(buffer: Buffer, filePath: string): boolean {
+export function fileExistsInZip(buffer: Buffer, fileName: string): boolean {
     const zip = new AdmZip(buffer);
-    return zip.getEntry(filePath) !== null;
+    // On ignore le chemin, on cherche le fichier par son nom (insensible à la casse)
+    const lowerName = fileName.toLowerCase();
+    return zip.getEntries().some(e => e.entryName.split('/').pop()?.toLowerCase() === lowerName);
 }
 
 export function dirStructureMatches(buffer: Buffer, structure: string[]): boolean {

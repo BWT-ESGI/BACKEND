@@ -7,19 +7,57 @@ import { RuleResultService } from './rule-result.service';
 export class RuleResultController {
   constructor(private readonly service: RuleResultService) { }
 
+  @Get()
+  @ApiOperation({ summary: 'Get all rule results' })
+  @ApiResponse({ status: 200, description: 'List of all rule results.' })
+  async findAll() {
+    try {
+      const results = await this.service.findAll();
+      // Toujours renvoyer un tableau, même vide, pour compatibilité front
+      return results;
+    } catch (err) {
+      console.error('Erreur lors de la récupération des RuleResults:', err);
+      // Renvoyer un tableau vide en cas d'erreur pour éviter le 404 côté front
+      return [];
+    }
+  }
+
   @Get('submission/:id')
   @ApiOperation({ summary: 'Get rule results by submission ID' })
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 200, description: 'Rule results for submission.' })
-  findBySubmission(@Param('id') id: string) {
-    return this.service.findBySubmission(id);
+  async findBySubmission(@Param('id') id: string) {
+    try {
+      const results = await this.service.findBySubmission(id);
+      // Toujours renvoyer un tableau, même vide, pour compatibilité front
+      return results;
+    } catch (err) {
+      console.error(`Erreur lors de la récupération des RuleResults pour la soumission ${id}:`, err);
+      // Renvoyer un tableau vide en cas d'erreur pour éviter le 404 côté front
+      return [];
+    }
   }
 
   @Get('rule/:id')
   @ApiOperation({ summary: 'Get rule results by rule ID' })
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 200, description: 'Rule results for rule.' })
-  findByRule(@Param('id') id: string) {
-    return this.service.findByRule(id);
+  async findByRule(@Param('id') id: string) {
+    try {
+      const results = await this.service.findByRule(id);
+      if (!results || results.length === 0) {
+        return {
+          message: `Aucun résultat pour la règle ${id}.`,
+          results: [],
+        };
+      }
+      return { results };
+    } catch (err) {
+      console.error(`Erreur lors de la récupération des RuleResults pour la règle ${id}:`, err);
+      return {
+        error: 'Erreur lors de la récupération des résultats de règles',
+        details: err?.message || err,
+      };
+    }
   }
 }
