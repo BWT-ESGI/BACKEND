@@ -11,6 +11,7 @@ import { RuleType } from '@/rule/entities/rule.entity';
 import { RuleResultService } from '@/rule-result/rule-result.service';
 import { COMMON_FILES, COMMON_ARCHITECTURES } from '@/rule/rule-suggestions';
 import * as zipUtils from './zip-utils';
+import { UpdateFileComparatorService } from './updateFileComparator.service';
 
 @Injectable()
 export class SubmissionService {
@@ -21,6 +22,7 @@ export class SubmissionService {
     private readonly minioService: MinioService,
     private readonly ruleService: RuleService,
     private readonly ruleResultService: RuleResultService,
+    private readonly updateFileComparatorService: UpdateFileComparatorService,
   ) { }
 
   async checkRules(submission: Submission, fileBuffer: Buffer) {
@@ -124,6 +126,9 @@ export class SubmissionService {
     } else {
       console.warn('Aucun fichier ni repo git fourni pour la soumission', { submissionId: submission.id });
     }
+
+    const projectId = deliverable.projectId;
+    this.updateFileComparatorService.sendSubmissionsToMicroservice(projectId);
 
     return submission;
   }

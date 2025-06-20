@@ -26,13 +26,13 @@ export class ReportController {
     return this.reportService.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a report by ID' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: 200, description: 'Report found.' })
-  async findOne(@Param('id') id: string): Promise<Report> {
-    return this.reportService.findOne(id);
-  }
+  // @Get(':id')
+  // @ApiOperation({ summary: 'Get a report by ID' })
+  // @ApiParam({ name: 'id', type: String })
+  // @ApiResponse({ status: 200, description: 'Report found.' })
+  // async findOne(@Param('id') id: string): Promise<Report> {
+  //   return this.reportService.findOne(id);
+  // }
 
   @Get('/by-group/:id')
   @ApiOperation({ summary: 'Get all reports by group ID' })
