@@ -23,6 +23,9 @@ export class Section {
   @Column('text')
   content: string;
 
+  @Column({ type: 'timestamp', nullable: true })
+  lastEdit: Date;
+
   @ManyToOne(() => Report, (report) => report.sections, { onDelete: 'CASCADE' })
   report: Report;
 }
