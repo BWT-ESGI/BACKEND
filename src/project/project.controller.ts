@@ -15,6 +15,18 @@ export class ProjectController {
     private readonly projectService: ProjectService,
   ) { }
 
+  @Patch('/comparison-result/:id')
+  @Auth(AuthType.None)
+  @ApiOperation({ summary: 'Met à jour le résultat de comparaison d’un projet' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({ status: 200, description: 'Champ comparisonResult mis à jour.' })
+  async updateComparisonResult(
+    @Param('id') id: string,
+    @Body('comparisonResult') comparisonResult: any,
+  ) {
+    return this.projectService.updateProject(id, { comparisonResult });
+  }
+
   @Post()
   @Auth(AuthType.Bearer)
   @ApiOperation({ summary: 'Create a new project' })

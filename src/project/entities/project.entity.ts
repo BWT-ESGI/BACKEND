@@ -74,4 +74,7 @@ export class Project {
 
   @Column('jsonb', { nullable: true, default: () => "'[]'" })
   sections: { id: string; title: string; content?: string }[];
+
+  @Column({ type: 'jsonb', nullable: true })
+  comparisonResult?: any;
 }

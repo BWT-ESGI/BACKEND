@@ -13,7 +13,6 @@ export class DeliverableService {
   ) { }
 
   create(createDeliverableDto: CreateDeliverableDto): Promise<Deliverable> {
-    // Correction : deadline est déjà une string ISO, il faut la convertir explicitement en Date
     const deliverable = this.deliverableRepository.create({
       ...createDeliverableDto,
       deadline: new Date(createDeliverableDto.deadline),
