@@ -36,8 +36,8 @@ export class Group {
   defense: Defense;
 
   @OneToOne(() => Report, (report) => report.group, {
-    cascade: true,
     onDelete: 'CASCADE',
+    cascade: ['insert', 'update', 'remove'],
   })
   @JoinColumn()
   report: Report;

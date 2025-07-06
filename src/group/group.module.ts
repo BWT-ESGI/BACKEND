@@ -9,9 +9,18 @@ import { Defense } from '@/defense/entities/defense.entity';
 import {SaveGroupService} from './saveGroup.service';
 import { DeadlineNotExpiredGuard } from './guard/DeadlineNotExpiredGuard';
 import { ProjectModule } from '@/project/project.module';
+import { Section } from '@/report/entities/section.entity';
+import { Report } from '@/report/entities/report.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Group, Project, User, Defense]),
+  imports: [TypeOrmModule.forFeature([
+    Group, 
+    Project, 
+    User, 
+    Defense,
+    Report,
+    Section
+  ]),
   forwardRef(() => ProjectModule),
 ],
   controllers: [GroupController],
