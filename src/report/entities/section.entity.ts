@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   Index,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import { Report } from '@/report/entities/report.entity';
@@ -23,7 +24,7 @@ export class Section {
   @Column('text')
   content: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @UpdateDateColumn({ type: 'timestamp' })
   lastEdit: Date;
 
   @ManyToOne(() => Report, (report) => report.sections, { onDelete: 'CASCADE' })
