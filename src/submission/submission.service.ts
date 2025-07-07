@@ -9,7 +9,7 @@ import { MinioService } from '@/minio/minio.service';
 import { RuleService } from '@/rule/rule.service';
 import { RuleType } from '@/rule/entities/rule.entity';
 import { RuleResultService } from '@/rule-result/rule-result.service';
-import { COMMON_FILES, COMMON_ARCHITECTURES } from '@/rule/rule-suggestions';
+import { COMMON_ARCHITECTURES } from '@/rule/rule-suggestions';
 import * as zipUtils from './zip-utils';
 import { UpdateFileComparatorService } from './updateFileComparator.service';
 
@@ -85,7 +85,6 @@ export class SubmissionService {
   }
 
   async create(dto: CreateSubmissionDto, fileBuffer?: Buffer, fileName?: string, fileSize?: number): Promise<Submission> {
-    console.log('Début création soumission', { dto, hasFile: !!fileBuffer, fileName });
     const deliverable = await this.deliverableService.findOne(dto.deliverableId);
     // 1. Créer la soumission en base pour obtenir l'id
     let submission = this.submissionRepository.create({
@@ -141,6 +140,13 @@ export class SubmissionService {
     return this.submissionRepository.findOne({ where: { id } });
   }
 
+  findByGroupId(groupId: string): Promise<Submission[]> {
+    return this.submissionRepository.find({
+      where: { groupId },
+      relations: ['deliverable', 'student', 'group'],
+    });
+  }
+
   async findByDeliverable(deliverableId: string): Promise<Submission[]> {
     return this.submissionRepository.find({ where: { deliverableId } });
   }
@@ -153,4 +159,6 @@ export class SubmissionService {
   async remove(id: string): Promise<void> {
     await this.submissionRepository.delete(id);
   }
+
+  
 }

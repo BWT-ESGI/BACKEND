@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, NotFoundException } from '@nestjs/common';
 import { SubmissionService } from './submission.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { UpdateSubmissionDto } from './dto/update-submission.dto';
@@ -6,6 +6,7 @@ import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { Response } from 'express';
 import { MinioService } from '@/minio/minio.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { Submission } from './entities/submission.entity';
 
 @ApiTags('Submissions')
 @Controller('submissions')
@@ -40,31 +41,22 @@ export class SubmissionController {
     }
   }
 
-  @Get()
+  @Get('getAll')
   @ApiOperation({ summary: 'Get all submissions' })
   @ApiResponse({ status: 200, description: 'List of submissions.' })
   findAll() {
     return this.submissionService.findAll();
   }
 
-  @Get(':id')
+  @Get('getByGroupId/:groupId')
   @ApiOperation({ summary: 'Get a submission by ID' })
-  @ApiParam({ name: 'id', type: String })
+  @ApiParam({ name: 'groupId', type: String })
   @ApiResponse({ status: 200, description: 'Submission found.' })
-  async findOne(@Param('id') id: string) {
-    try {
-      const submission = await this.submissionService.findOne(id);
-      if (!submission) {
-        return { message: `Aucune soumission trouvée pour l'id ${id}` };
-      }
-      return { submission };
-    } catch (err) {
-      console.error(`Erreur lors de la récupération de la soumission ${id}:`, err);
-      return {
-        error: 'Erreur lors de la récupération de la soumission',
-        details: err?.message || err,
-      };
-    }
+  async findByGroup(
+    @Param('groupId') groupId: string,
+  ): Promise<Submission[]> {
+    const subs = await this.submissionService.findByGroupId(groupId);
+    return subs;
   }
 
   @Get('deliverable/:id')
