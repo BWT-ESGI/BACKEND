@@ -21,7 +21,6 @@ export class ReportService {
     const group = await this.groupRepository.findOne({ where: { id: groupId }, relations: ['report'] });
     if (!group) throw new Error('Group not found');
 
-    // Vérifie s'il existe déjà un report pour ce groupe
     let report = await this.reportRepository.findOne({ where: { group: { id: groupId } }, relations: ['sections'] });
     if (report) {
       // Mets à jour les sections si besoin
