@@ -18,12 +18,22 @@ export class Promotion {
   @Column()
   name: string;
 
-  @ManyToOne(() => User, (user) => user.promotions, { eager: true })
+  @ManyToOne(() => User, (user) => user.promotions, { 
+    eager: true,
+    cascade: ['remove'],
+    onDelete: 'CASCADE', 
+ })
   teacher: User;
 
-  @ManyToMany(() => User, (user) => user.promotions)
+  @ManyToMany(() => User, (user) => user.promotions, 
+  {
+    cascade: ['remove'],
+    onDelete: 'CASCADE', 
+  })
   students: User[];
 
-  @OneToMany(() => Project, (project) => project.promotion)
+  @OneToMany(() => Project, (project) => project.promotion,
+  {
+  })
   projects: Project[];
 }

@@ -14,7 +14,9 @@ export class Report {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => Group, (group) => group.report)
+  @OneToOne(() => Group, (group) => group.report, {
+    onDelete: 'CASCADE', 
+  })
   @JoinColumn()
   group: Group;
 

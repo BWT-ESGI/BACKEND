@@ -5,6 +5,8 @@ import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { MinioService } from '../minio/minio.service';
 import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { User } from '@/common/decorators/user.decorator';
+import { User as UserEntity } from '@/users/entities/user.entity';
 
 @ApiTags('Deliverables')
 @Controller('deliverables')
@@ -80,7 +82,10 @@ export class DeliverableController {
   @ApiOperation({ summary: 'Get all deliverables for a given projectId' })
   @ApiParam({ name: 'projectId', type: String })
   @ApiResponse({ status: 200, description: 'List of deliverables for the project.' })
-  findAllByProject(@Param('projectId') projectId: string) {
-    return this.deliverableService.findAllByProjectId(projectId);
+  findAllByProject(
+    @Param('projectId') projectId: string,
+    @User() user: UserEntity,
+  ) {
+    return this.deliverableService.findAllByProjectId(projectId, user);
   }
 }

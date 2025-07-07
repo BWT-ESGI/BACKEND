@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Deliverable } from './entities/deliverable.entity';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
+import { User } from '@/users/entities/user.entity';
 
 @Injectable()
 export class DeliverableService {
@@ -45,7 +46,9 @@ export class DeliverableService {
     await this.deliverableRepository.delete(id);
   }
 
-  async findAllByProjectId(projectId: string): Promise<Deliverable[]> {
+  async findAllByProjectId(projectId: string, user: User): Promise<Deliverable[]> {
+        const userId = user.sub;
+
     return this.deliverableRepository.find({
       where: { project: { id: projectId } },
       relations: ['project'],

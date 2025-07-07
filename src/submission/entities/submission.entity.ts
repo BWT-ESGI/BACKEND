@@ -43,7 +43,7 @@ export class Submission {
   @Column()
   groupId: string;
 
-  @ManyToOne(() => Group, { nullable: true })
+  @ManyToOne(() => Group, { nullable: true, onDelete: 'CASCADE' })
   group?: Group;
 
   @ManyToOne(() => User, { nullable: true })

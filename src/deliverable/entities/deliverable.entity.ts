@@ -36,7 +36,7 @@ export class Deliverable {
   @Column({ nullable: true })
   maxSize?: number; // En Mo
   
-  @ManyToOne(() => Project, project => project.deliverables, { nullable: false })
+  @ManyToOne(() => Project, project => project.deliverables, { nullable: false, onDelete: 'CASCADE',  })
   project: Project;
 
   @Column({ type: 'uuid' })
