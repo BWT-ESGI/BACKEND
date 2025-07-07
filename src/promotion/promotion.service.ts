@@ -7,6 +7,7 @@ import { UpdatePromotionDto } from './dto/update-promotion.dto';
 import { User } from '@/users/entities/user.entity';
 import { UsersService } from '@/users/users.service';
 import { UpdateStudentsPromotionDto } from './dto/update-students-promotion.dto';
+import { Group } from '@/group/entities/group.entity';
 
 @Injectable()
 export class PromotionService {
@@ -15,6 +16,8 @@ export class PromotionService {
     private userRepository: Repository<User>,
     @InjectRepository(Promotion)
     private readonly promotionRepository: Repository<Promotion>,
+    @InjectRepository(Group)
+    private readonly groupRepository: Repository<Group>,
     private readonly userService: UsersService,
   ) {}
 
@@ -106,12 +109,40 @@ export class PromotionService {
 
     const promotion = await this.promotionRepository.findOne({
       where: { id },
-      relations: ['students'],
+      relations: ['students', 'projects'],
     });
     if (!promotion) {
       throw new NotFoundException(`Promotion ${id} introuvable`);
     }
 
+    // Vérifier que les étudiants existent
+    promotion.students = promotion.students ?? [];
+
+    // Identifier les utilisateurs retirés de la promotion
+    const removedStudents = promotion.students.filter(
+      (student) => !studentIds.includes(student.id),
+    );
+
+    if (removedStudents.length > 0) {
+      // Récupérer les projets de la promotion
+      const projectIds = promotion.projects.map((project) => project.id);
+
+      // Récupérer les groupes des projets
+      const groups = await this.groupRepository.find({
+        where: { project: { id: In(projectIds) } },
+        relations: ['members'],
+      });
+
+      // Supprimer les membres des groupes qui correspondent aux utilisateurs retirés
+      for (const group of groups) {
+        group.members = group.members.filter(
+          (member) => !removedStudents.some((student) => student.id === member.id),
+        );
+        await this.groupRepository.save(group);
+      }
+    }
+
+    // Mettre à jour les étudiants de la promotion
     const students = await this.userRepository.findBy({
       id: In(studentIds),
     });
@@ -136,5 +167,29 @@ export class PromotionService {
       .relation(Promotion, 'students')
       .of(id);
     await this.promotionRepository.delete(id);
+  }
+
+  async removeUserFromPromotion(userId: string, promotionId: string): Promise<void> {
+    const promotion = await this.promotionRepository.findOne({
+      where: { id: promotionId },
+      relations: ['students', 'projects', 'projects.groups'],
+    });
+
+    if (!promotion) {
+      throw new NotFoundException(`Promotion ${promotionId} introuvable`);
+    }
+
+    // Retirer l'utilisateur des étudiants de la promotion
+    promotion.students = promotion.students.filter(student => student.id !== userId);
+
+    // Retirer l'utilisateur des groupes liés aux projets de la promotion
+    for (const project of promotion.projects) {
+      for (const group of project.groups) {
+        group.members = group.members.filter(member => member.id !== userId);
+        await this.groupRepository.save(group);
+      }
+    }
+
+    await this.promotionRepository.save(promotion);
   }
 }

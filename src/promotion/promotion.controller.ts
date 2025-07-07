@@ -63,4 +63,16 @@ export class PromotionController {
   remove(@Param('id') id: string) {
     return this.promotionService.remove(id);
   }
+
+  @Delete(':promotionId/users/:userId')
+  @ApiOperation({ summary: 'Remove a user from a promotion' })
+  @ApiParam({ name: 'promotionId', type: String })
+  @ApiParam({ name: 'userId', type: String })
+  @ApiResponse({ status: 200, description: 'User removed from promotion.' })
+  async removeUserFromPromotion(
+    @Param('promotionId') promotionId: string,
+    @Param('userId') userId: string,
+  ): Promise<void> {
+    await this.promotionService.removeUserFromPromotion(userId, promotionId);
+  }
 }
