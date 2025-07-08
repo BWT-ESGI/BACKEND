@@ -16,6 +16,7 @@ import { MinioModule } from './minio/minio.module';
 import { DefenseModule } from './defense/defense.module';
 import { EvaluationModule } from './evaluation/evaluation.module';
 import { StatisticsModule } from './statistics/statistics.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { StatisticsModule } from './statistics/statistics.module';
     IamModule,
     EvaluationModule,
     StatisticsModule,
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [config.KEY],
       useFactory: (configService: ConfigType<typeof config>) => {
