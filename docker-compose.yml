@@ -35,6 +35,7 @@ services:
     volumes:
       - minio-data:/data
 
+
   app:
     build:
       context: .
@@ -67,4 +68,5 @@ services:
 
 volumes:
   minio-data:
+    external: true
   db_data:
