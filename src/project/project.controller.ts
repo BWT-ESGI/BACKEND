@@ -13,6 +13,7 @@ import { User as UserEntity } from '@/users/entities/user.entity';
 export class ProjectController {
   constructor(
     private readonly projectService: ProjectService,
+    
   ) { }
 
   @Patch('/comparison-result/:id')
@@ -68,5 +69,14 @@ export class ProjectController {
   @ApiResponse({ status: 200, description: 'Project deleted.' })
   remove(@Param('id') id: string) {
     return this.projectService.remove(id);
+  }
+
+  @Post('/callCompareService/:id')
+  @Auth(AuthType.Bearer)
+  @ApiOperation({ summary: 'Trigger la comparaison des fichiers pour un projet' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({ status: 202, description: 'Comparaison déclenchée.' })
+  triggerComparison(@Param('id') id: string) {
+    return this.projectService.triggerProjectComparison(id);
   }
 }

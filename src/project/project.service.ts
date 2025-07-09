@@ -10,6 +10,7 @@ import { User } from '@/users/entities/user.entity';
 import { Role } from '@/users/enums/role.enum';
 import { ProjectStatus } from './enums/project-status.enum';
 const Mailjet = require('node-mailjet');
+import { UpdateFileComparatorService } from '@/submission/updateFileComparator.service';
 
 @Injectable()
 export class ProjectService {
@@ -27,6 +28,7 @@ export class ProjectService {
     private readonly groupRepository: Repository<Group>,
     @InjectRepository(Report)
     private readonly reportRepository: Repository<Report>,
+    private readonly updateFileComparatorService: UpdateFileComparatorService,
   ) {}
 
   async findAll(user: User): Promise<Project[]> {
@@ -186,7 +188,7 @@ export class ProjectService {
     await this.projectRepository.delete(id);
   }
 
-   async sendProjectNotificationEmail(to: string, firstName: string, projectName: string, promotionName: string): Promise<void> {
+  async sendProjectNotificationEmail(to: string, firstName: string, projectName: string, promotionName: string): Promise<void> {
     await this.mailjetClient.post('send', { version: 'v3.1' }).request({
       Messages: [
         {
@@ -203,5 +205,17 @@ export class ProjectService {
         },
       ],
     });
+  }
+
+  async triggerProjectComparison(id: string) {
+    const project = await this.projectRepository.findOne({ where: { id } });
+    if (!project) throw new NotFoundException(`Project ${id} introuvable`);
+
+    if (!project.callComparatorService) {
+      project.callComparatorService = true;
+      await this.projectRepository.save(project);
+
+      this.updateFileComparatorService.sendSubmissionsToMicroservice(id);
+    }
   }
 }

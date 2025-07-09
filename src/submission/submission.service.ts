@@ -11,7 +11,6 @@ import { RuleType } from '@/rule/entities/rule.entity';
 import { RuleResultService } from '@/rule-result/rule-result.service';
 import { COMMON_ARCHITECTURES } from '@/rule/rule-suggestions';
 import * as zipUtils from './zip-utils';
-import { UpdateFileComparatorService } from './updateFileComparator.service';
 
 @Injectable()
 export class SubmissionService {
@@ -22,7 +21,6 @@ export class SubmissionService {
     private readonly minioService: MinioService,
     private readonly ruleService: RuleService,
     private readonly ruleResultService: RuleResultService,
-    private readonly updateFileComparatorService: UpdateFileComparatorService,
   ) { }
 
   async checkRules(submission: Submission, fileBuffer: Buffer) {
@@ -127,7 +125,6 @@ export class SubmissionService {
     }
 
     const projectId = deliverable.projectId;
-    this.updateFileComparatorService.sendSubmissionsToMicroservice(projectId);
 
     return submission;
   }

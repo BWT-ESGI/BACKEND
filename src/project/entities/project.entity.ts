@@ -54,6 +54,9 @@ export class Project {
   endAt: Date;
 
   @Column({ nullable: true })
+  callComparatorService: boolean = false;
+
+  @Column({ nullable: true })
   deadlineGroupSelection: Date;
 
   @Column({

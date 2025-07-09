@@ -8,11 +8,13 @@ import { Group } from '@/group/entities/group.entity';
 import { Report } from '@/report/entities/report.entity';
 import { ProjectGroupAutoAssignService } from './project-group-auto-assign.service';
 import { UsersModule } from '@/users/users.module';
+import { ProjectComparatorTriggerService } from './projectComparatorTriggerService';
+import { SubmissionModule } from '@/submission/submission.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Project, Promotion, Group, Report]), UsersModule],
+  imports: [TypeOrmModule.forFeature([Project, Promotion, Group, Report]), UsersModule, SubmissionModule],
   controllers: [ProjectController],
-  providers: [ProjectService, ProjectGroupAutoAssignService],
+  providers: [ProjectService, ProjectGroupAutoAssignService, ProjectComparatorTriggerService],
   exports: [ProjectService],
 })
 export class ProjectModule {}
