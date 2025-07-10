@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Submission } from './entities/submission.entity';
@@ -28,6 +28,13 @@ export class SubmissionService {
       const rules = await this.ruleService.findByDeliverable(submission.deliverableId);
       if (!rules || rules.length === 0) {
         console.warn(`Aucune règle trouvée pour le livrable ${submission.deliverableId}`);
+        await this.ruleResultService.create({
+          submissionId: submission.id,
+          ruleId: null,
+          passed: true,
+          message: 'Aucune règle à valider, soumission conforme.'
+        });
+        return;
       }
       for (const rule of rules) {
         let passed = false;
@@ -84,7 +91,6 @@ export class SubmissionService {
 
   async create(dto: CreateSubmissionDto, fileBuffer?: Buffer, fileName?: string, fileSize?: number): Promise<Submission> {
     const deliverable = await this.deliverableService.findOne(dto.deliverableId);
-    // 1. Créer la soumission en base pour obtenir l'id
     let submission = this.submissionRepository.create({
       ...dto,
       deliverable,
@@ -96,14 +102,13 @@ export class SubmissionService {
     });
     submission.isLate = submission.submittedAt > deliverable.deadline;
     if (submission.isLate && !deliverable.allowLateSubmission) {
-      throw new Error('Soumission tardive non autorisée');
+      throw new BadRequestException('Soumission tardive non autorisée');
     }
     submission.penaltyApplied = submission.isLate
       ? ((submission.submittedAt.getTime() - deliverable.deadline.getTime()) / 1000 / 3600) * deliverable.penaltyPerHourLate
       : 0;
     submission = await this.submissionRepository.save(submission);
 
-    // 2. Uploader le fichier avec l'id réel
     if (fileBuffer && fileName) {
       const objectName = `submissions/${submission.id}/${fileName}`;
       await this.minioService.upload('bwt', objectName, fileBuffer, fileSize);
@@ -111,15 +116,42 @@ export class SubmissionService {
       submission.filename = fileName;
       submission.size = fileSize;
       await this.submissionRepository.save(submission);
-      // Vérification automatique des règles
-      console.log('Déclenchement checkRules (archive)', { submissionId: submission.id });
       await this.checkRules(submission, fileBuffer);
     } else if (dto.gitRepoUrl) {
+      const tmp = require('tmp');
+      const simpleGit = require('simple-git');
+      const fs = require('fs');
+      const path = require('path');
+      const AdmZip = require('adm-zip');
+      const tmpDir = tmp.dirSync({ unsafeCleanup: true });
+      const repoPath = tmpDir.name;
+      await simpleGit().clone(dto.gitRepoUrl, repoPath);
+      const zip = new AdmZip();
+      const addDirToZip = (dir, zipPath = '') => {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+          const fullPath = path.join(dir, file);
+          const relPath = path.join(zipPath, file);
+          if (fs.statSync(fullPath).isDirectory()) {
+            addDirToZip(fullPath, relPath);
+          } else {
+            zip.addLocalFile(fullPath, zipPath);
+          }
+        }
+      };
+      addDirToZip(repoPath);
+      const zipBuffer = zip.toBuffer();
+      const zipFileName = `repo-${submission.id}.zip`;
+      const objectName = `submissions/${submission.id}/${zipFileName}`;
+      await this.minioService.upload('bwt', objectName, zipBuffer, zipBuffer.length);
+      submission.archiveObjectName = objectName;
+      submission.filename = zipFileName;
+      submission.size = zipBuffer.length;
       submission.gitRepoUrl = dto.gitRepoUrl;
       await this.submissionRepository.save(submission);
-      // Générer les RuleResults même pour les livrables git (buffer vide)
-      console.log('Déclenchement checkRules (git)', { submissionId: submission.id });
-      await this.checkRules(submission, Buffer.alloc(0));
+      console.log('Déclenchement checkRules (git-archive)', { submissionId: submission.id });
+      await this.checkRules(submission, zipBuffer);
+      tmpDir.removeCallback();
     } else {
       console.warn('Aucun fichier ni repo git fourni pour la soumission', { submissionId: submission.id });
     }

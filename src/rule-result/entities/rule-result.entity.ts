@@ -22,8 +22,8 @@ import {
     @ManyToOne(() => Rule, (r) => r.id, { onDelete: 'CASCADE' })
     rule: Rule;
   
-    @Column()
-    ruleId: string;
+    @Column({ nullable: true })
+    ruleId: string | null;
   
     @Column({ default: false })
     passed: boolean;
