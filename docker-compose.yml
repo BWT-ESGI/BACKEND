@@ -32,8 +32,6 @@ services:
     ports:
       - "${MINIO_FIRST_PORT}:9000"
       - "${MINIO_SECOND_PORT}:9001"
-    volumes:
-      - minio-data:/data
 
 
   app:
@@ -67,6 +65,9 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
 
 volumes:
-  minio-data:
-    external: true
   db_data:
+
+networks:
+  default:
+    external: true
+    name: bwt-net
