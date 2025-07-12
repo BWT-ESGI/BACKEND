@@ -30,8 +30,12 @@ export class UpdateFileComparatorService {
       projectId: projectId,
     }));
 
+    console.log('[UpdateFileComparatorService] Submissions to send:', data);
+
     const microserviceUrl =
       process.env.FILE_COMPARATOR_MICROSERVICE_URL || 'http://localhost:3004/compare';
+
+    console.log('[UpdateFileComparatorService] Microservice URL:', microserviceUrl);
 
     // Force IPv4 by using a custom http.Agent
     const agent = new http.Agent({ family: 4 });
@@ -43,6 +47,7 @@ export class UpdateFileComparatorService {
         { httpAgent: agent }
       );
       const result = await lastValueFrom(response);
+      console.log('[UpdateFileComparatorService] Microservice response:', result.data);
       return result.data;
     } catch (error) {
       console.error('Error sending submissions to microservice:', error);

@@ -211,11 +211,9 @@ export class ProjectService {
     const project = await this.projectRepository.findOne({ where: { id } });
     if (!project) throw new NotFoundException(`Project ${id} introuvable`);
 
-    if (!project.callComparatorService) {
-      project.callComparatorService = true;
-      await this.projectRepository.save(project);
-
-      this.updateFileComparatorService.sendSubmissionsToMicroservice(id);
-    }
+    // On lance toujours la comparaison, peu importe callComparatorService
+    project.callComparatorService = true;
+    await this.projectRepository.save(project);
+    await this.updateFileComparatorService.sendSubmissionsToMicroservice(id);
   }
 }

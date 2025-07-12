@@ -71,12 +71,13 @@ export class ProjectController {
     return this.projectService.remove(id);
   }
 
-  @Post('/callCompareService/:id')
+  @Post(':id/trigger-comparison')
   @Auth(AuthType.Bearer)
-  @ApiOperation({ summary: 'Trigger la comparaison des fichiers pour un projet' })
+  @ApiOperation({ summary: 'Déclenche une nouvelle comparaison pour le projet' })
   @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: 202, description: 'Comparaison déclenchée.' })
-  triggerComparison(@Param('id') id: string) {
-    return this.projectService.triggerProjectComparison(id);
+  @ApiResponse({ status: 200, description: 'Comparaison lancée.' })
+  async triggerComparison(@Param('id') id: string) {
+    await this.projectService.triggerProjectComparison(id);
+    return { message: 'Comparaison lancée.' };
   }
 }

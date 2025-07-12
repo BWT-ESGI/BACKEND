@@ -29,6 +29,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+      MINIO_ENDPOINT: minio
     ports:
       - "${MINIO_FIRST_PORT}:9000"
       - "${MINIO_SECOND_PORT}:9001"
@@ -54,20 +55,29 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
+      FILE_COMPARATOR_MICROSERVICE_URL: ${FILE_COMPARATOR_MICROSERVICE_URL}
       # Configuration Redis
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      # Configuration MinIO
-      MINIO_HOST: minio
-      MINIO_PORT: 9000
-      MINIO_USE_SSL: 'false'
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+
+  turbo-comparator:
+    image: teegee222/turbo-comparator:latest
+    container_name: bwt-turbo-comparator
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      MINIO_ENDPOINT: minio
+      MINIO_FIRST_PORT: 9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+      PROJECT_API_URL: ${PROJECT_API_URL}
+      PORT: ${PORT}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - minio
+      - app
 
 volumes:
   db_data:
-
-networks:
-  default:
-    external: true
-    name: bwt-net
