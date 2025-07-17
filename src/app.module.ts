@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { Promotion } from './promotion/entities/promotion.entity';
+import { Report } from './report/entities/report.entity';
+import { Section } from './report/entities/section.entity';
+import { Deliverable } from './deliverable/entities/deliverable.entity';
+import { Submission } from './submission/entities/submission.entity';
 import { UsersModule } from './users/users.module';
 import { ProjectModule } from './project/project.module';
 import { PromotionModule } from './promotion/promotion.module';
@@ -33,6 +38,13 @@ import { ScheduleModule } from '@nestjs/schedule';
     GroupModule,
     DeliverableModule,
     SubmissionModule,
+    TypeOrmModule.forFeature([
+      Promotion,
+      Report,
+      Section,
+      Deliverable,
+      Submission,
+    ]),
     PromotionModule,
     ProjectModule,
     UsersModule,

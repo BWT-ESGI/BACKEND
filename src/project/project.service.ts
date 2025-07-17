@@ -200,7 +200,7 @@ export class ProjectService {
           Subject: `Nouveau projet : ${projectName}`,
           HTMLPart: `<h3>Bonjour ${firstName},</h3>
                     <p>Un nouveau projet <strong>${projectName}</strong> a été créé dans votre promotion ${promotionName}.</p>
-                    <p>Vous serez bientôt affecté à un groupe ou à en choisir un.</p>`,
+                    <p>Vous serez bientôt affecté à un groupe ou demandé à en choisir un.</p>`,
           TextPart: `Bonjour ${firstName},\n\nUn nouveau projet "${projectName}" a été créé dans votre promotion.`,
         },
       ],
