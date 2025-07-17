@@ -6,9 +6,8 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { Project } from '@/project/entities/project.entity';
 import { User } from '@/users/entities/user.entity';
-import { SaveGroupDto } from './dto/save-groups.dto';
 import { Defense } from '@/defense/entities/defense.entity';
-import { Month } from '@/defense/enums/month.enum';
+
 
 @Injectable()
 export class GroupService {

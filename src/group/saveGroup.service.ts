@@ -1,4 +1,3 @@
-// src/group/save-group.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -32,17 +31,16 @@ export class SaveGroupService {
     projectId: string,
     dtos: SaveGroupDto[],
   ): Promise<Group[]> {
-    const project = await this.projectRepo.findOne({ where: { id: projectId } });
+    const project = await this.projectRepo.findOne({
+      where: { id: projectId },
+    });
     if (!project) throw new NotFoundException(`Project ${projectId} not found`);
 
-    // 1) charger tous les anciens groupes AVEC membres et rapports
+    // Charger tous les anciens groupes avec leurs relations
     const oldGroups = await this.groupRepo.find({
       where: { project: { id: projectId } },
-      relations: ['members', 'report', 'report.sections'],
+      relations: ['members', 'report', 'report.sections', 'defense'],
     });
-    const oldMap = new Map<string, Group>(
-      oldGroups.map(g => [g.id, g])
-    );
 
     const result: Group[] = [];
     for (const dto of dtos) {
@@ -54,35 +52,35 @@ export class SaveGroupService {
       let membershipChanged = false;
 
       if (dto.id) {
-        // --- mise à jour d’un groupe existant ---
+        // --- Mise à jour d’un groupe existant ---
         const g = await this.groupRepo.findOne({
           where: { id: dto.id },
-          relations: ['members', 'report', 'report.sections'],
+          relations: ['members', 'report', 'report.sections', 'defense'],
         });
         if (!g) throw new NotFoundException(`Group ${dto.id} not found`);
 
-        // comparer membres
-        const oldIds = g.members.map(u => u.id).sort();
+        // Comparer les membres
+        const oldIds = g.members.map((u) => u.id).sort();
         const newIds = dto.memberIds.slice().sort();
-        membershipChanged = oldIds.length !== newIds.length
-          || oldIds.some((id, i) => id !== newIds[i]);
+        membershipChanged =
+          oldIds.length !== newIds.length ||
+          oldIds.some((id, i) => id !== newIds[i]);
 
         g.name = dto.name;
         g.members = members;
         group = await this.groupRepo.save(g);
-
       } else {
-        // --- création d’un nouveau groupe ---
+        // --- Création d’un nouveau groupe ---
         const g = this.groupRepo.create({
           name: dto.name,
           project,
           members,
         });
         group = await this.groupRepo.save(g);
-        membershipChanged = true; // nouveau = on doit créer un rapport
+        membershipChanged = true; // Nouveau groupe = rapport et défense à créer
       }
 
-      // 2) si la liste des membres a changé, supprimer l’ancien rapport  ses sections
+      // Supprimer l’ancien rapport + sections si les membres ont changé
       if (membershipChanged && group.report) {
         if (group.report.sections?.length) {
           await this.sectionRepo.remove(group.report.sections);
@@ -90,7 +88,7 @@ export class SaveGroupService {
         await this.reportRepo.remove(group.report);
       }
 
-      // 3) s'il n'existe **aucun** rapport pour ce groupe, en créer un
+      // Créer un rapport si aucun n’existe
       const existingReport = await this.reportRepo.findOne({
         where: { group: { id: group.id } },
       });
@@ -98,7 +96,11 @@ export class SaveGroupService {
         const newReport = this.reportRepo.create({ group });
         await this.reportRepo.save(newReport);
       }
-      // recharger avec relations
+
+      // ✅ Créer ou mettre à jour la défense
+      await this.ensureDefense(group);
+
+      // Recharger le groupe avec toutes ses relations
       const full = await this.groupRepo.findOne({
         where: { id: group.id },
         relations: ['members', 'defense', 'report', 'report.sections'],
@@ -110,17 +112,23 @@ export class SaveGroupService {
   }
 
   private async ensureDefense(group: Group) {
+    const now = new Date();
+    const month = Object.values(Month)[now.getMonth()];
+
     if (!group.defense) {
-      const now = new Date();
-      const month = Object.values(Month)[now.getMonth()];
+      // ✅ Créer une nouvelle défense
       const def = this.defenseRepo.create({
         name: `${group.name} – Soutenance`,
         start: now,
-        end: new Date(now.getTime() + 30 * 60000),
+        end: new Date(now.getTime() + 30 * 60000), // 30 min plus tard
         month,
         group,
       });
       await this.defenseRepo.save(def);
+    } else {
+      // 🆙 Mettre à jour la défense existante (ex: nom du groupe changé)
+      group.defense.name = `${group.name} – Soutenance`;
+      await this.defenseRepo.save(group.defense);
     }
   }
 }
