@@ -129,7 +129,42 @@ export class AppService implements OnModuleInit {
       username: '222teegee',
       role: Role.Student,
     });
-
+    users.push({
+      email: 'Benji10812@gmail.com',
+      firstName: 'Benjamin',
+      lastName: 'Ollier',
+      username: 'Benji10812',
+      role: Role.Student,
+    });
+    users.push({
+      email: 'Skydurz@gmail.com',
+      firstName: 'Skydurz',
+      lastName: 'User',
+      username: 'Skydurz',
+      role: Role.Student,
+    });
+    users.push({
+      email: 'Patricia.labarque@gmail.com',
+      firstName: 'Patricia',
+      lastName: 'Labarque',
+      username: 'PatriciaLabarque',
+      role: Role.Student,
+    });
+    users.push({
+      email: 'Wissem.derghal@gmail.com',
+      firstName: 'Wissem',
+      lastName: 'Derghal',
+      username: 'WissemDerghal',
+      role: Role.Student,
+    });
+    users.push({
+      email: 'DERGHAL.wissem@gmail.com',
+      firstName: 'Wissem',
+      lastName: 'Derghal',
+      username: 'WissemDerghal2',
+      role: Role.Student,
+    });
+    
     const FILIERES = ['MOC', 'MCSI', 'IW', 'AL', 'SRC', 'IRVJ', 'IB', 'IABD', 'CS'];
     const promoList: string[] = [];
     for (let an = 1; an <= 5; an++) {
