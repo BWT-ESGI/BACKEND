@@ -323,7 +323,7 @@ export class AppService implements OnModuleInit {
             deadline: faker.date.future(),
             allowLateSubmission: faker.datatype.boolean(),
             penaltyPerHourLate: faker.number.int({ min: 0, max: 2 }),
-            submissionType: faker.helpers.arrayElement(['archive', 'git']),
+            submissionType: faker.helpers.arrayElement(['archive', 'git'] as const),
             maxSize: faker.number.int({ min: 100, max: 500 }), // En Mo
             project: savedProject,
             criteriaSetId: deliverableCriteriaSet?.id,
