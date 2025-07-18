@@ -115,7 +115,13 @@ export class SaveGroupService {
     const now = new Date();
     const month = Object.values(Month)[now.getMonth()];
 
-    if (!group.defense) {
+    // Always check if a defense exists in DB for this group
+    let defense = group.defense;
+    if (!defense) {
+      defense = await this.defenseRepo.findOne({ where: { group: { id: group.id } } });
+    }
+
+    if (!defense) {
       // ✅ Créer une nouvelle défense
       const def = this.defenseRepo.create({
         name: `${group.name} – Soutenance`,
@@ -127,8 +133,8 @@ export class SaveGroupService {
       await this.defenseRepo.save(def);
     } else {
       // 🆙 Mettre à jour la défense existante (ex: nom du groupe changé)
-      group.defense.name = `${group.name} – Soutenance`;
-      await this.defenseRepo.save(group.defense);
+      defense.name = `${group.name} – Soutenance`;
+      await this.defenseRepo.save(defense);
     }
   }
 }

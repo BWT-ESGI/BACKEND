@@ -235,7 +235,7 @@ export class StatisticsService implements OnModuleInit {
           : null,
         averageFileSize: submissions.length
           ? Math.round(
-              (submissions.reduce((a, b) => a + (b.size || 0), 0) /
+              (submissions.reduce((a, b) => a + (Number(b.size) || 0), 0) /
                 submissions.length /
                 1024 /
                 1024) *
@@ -243,7 +243,7 @@ export class StatisticsService implements OnModuleInit {
             ) / 100
           : null,
         submissionTypeCount: {
-          archive: submissions.filter((s) => !!s.archiveObjectName).length,
+          archive: submissions.filter((s) => !!s.archiveObjectName && !s.gitRepoUrl).length,
           fileUrl: submissions.filter((s) => !!s.fileUrl).length,
           gitRepo: submissions.filter((s) => !!s.gitRepoUrl).length,
         },
@@ -259,7 +259,8 @@ export class StatisticsService implements OnModuleInit {
                   if (!deliverable) return 0;
                   const deadline = new Date(deliverable.deadline).getTime();
                   const submitted = new Date(s.submittedAt).getTime();
-                  return (submitted - deadline) / (1000 * 60 * 60);
+                  // On ne compte que le retard (0 si en avance)
+                  return Math.max(0, (submitted - deadline) / (1000 * 60 * 60));
                 })
                 .reduce((a, b) => a + b, 0) /
                 submissions.length) *
