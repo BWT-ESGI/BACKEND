@@ -35,7 +35,7 @@ export class AppService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    //await this.seedUsers();
+    await this.seedUsers();
   }
 
   private async seedUsers() {
