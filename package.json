@@ -54,7 +54,8 @@
     "simple-git": "^3.28.0",
     "swagger-ui-express": "^5.0.1",
     "tmp": "^0.2.3",
-    "typeorm": "^0.3.2"
+    "typeorm": "^0.3.2",
+    "@faker-js/faker": "^8.4.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.2",
